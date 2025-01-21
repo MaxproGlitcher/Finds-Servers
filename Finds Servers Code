@@ -154,7 +154,7 @@ local refreshBtn = Instance.new("ImageButton", mainFrame)
 refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 refreshBtn.Size = UDim2.new(0, 50, 0, 50)
 refreshBtn.Position = UDim2.new(0.5, 180, 0.5, -220)
-refreshBtn.Image = "http://www.roblox.com/asset/?id=13825976376"
+refreshBtn.Image = "http://www.roblox.com/asset/?id=121466670596213"
 refreshBtn.BackgroundTransparency = 1
 refreshBtn.ZIndex = 2
 
@@ -173,7 +173,7 @@ local closeBtn = Instance.new("ImageButton", mainFrame)
 closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 closeBtn.Size = UDim2.new(0, 40, 0, 40)
 closeBtn.Position = UDim2.new(0.5, 230, 0.5, -220)
-closeBtn.Image = "http://www.roblox.com/asset/?id=101399572361146"
+closeBtn.Image = "http://www.roblox.com/asset/?id=92102008638440"
 closeBtn.BackgroundTransparency = 1
 closeBtn.ZIndex = 2
 
@@ -186,7 +186,7 @@ local resizeButton = Instance.new("ImageButton", mainFrame)
 resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
 resizeButton.Size = UDim2.new(0, 40, 0, 40)
 resizeButton.Position = UDim2.new(0.5, 128, 0.5, -220)
-resizeButton.Image = "http://www.roblox.com/asset/?id=122099699991994"
+resizeButton.Image = "http://www.roblox.com/asset/?id=72355890436728"
 resizeButton.BackgroundTransparency = 1
 resizeButton.ZIndex = 2
 
