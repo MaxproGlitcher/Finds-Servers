@@ -7,6 +7,8 @@ mainFrame.Size = UDim2.new(0, 500, 0, 400)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.BorderSizePixel = 0
 mainFrame.BackgroundColor3 = Color3.new(0.168627, 0.168627, 0.168627)
+mainFrame.Draggable = true -- Permet de déplacer le cadre
+mainFrame.Active = true -- Rend le cadre actif pour la détection des interactions
 
 -- Titre
 local titleLabel = Instance.new("TextLabel", mainFrame)
@@ -14,7 +16,7 @@ titleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 titleLabel.Size = UDim2.new(1, 0, 0, 40)
 titleLabel.Position = UDim2.new(0.5, 0, 0, 20)
 titleLabel.Font = Enum.Font.Ubuntu
-titleLabel.Text = "Find Servers By MaxproGlitcher V 1.4"
+titleLabel.Text = "Find Servers By MaxproGlitcher V 1.5"
 titleLabel.TextColor3 = Color3.new(1, 1, 1)
 titleLabel.TextSize = 24
 titleLabel.BackgroundTransparency = 1
@@ -26,6 +28,7 @@ scrollFrame.Position = UDim2.new(0.5, 0, 0.5, 20)
 scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
+
 
 -- Fonction pour récupérer les serveurs
 function getServers()
@@ -76,7 +79,7 @@ function refreshServers()
             jobIdLabel.Position = UDim2.new(0.5, -74, 0.5, -56)
             jobIdLabel.Font = Enum.Font.Ubuntu
             jobIdLabel.BackgroundTransparency = 1
-            jobIdLabel.Text = server.serverId
+            jobIdLabel.Text = "   ID: " .. server.serverId -- Ajout de "ID: " avant l'identifiant
             jobIdLabel.TextColor3 = Color3.new(0.541176, 0.541176, 0.541176)
             jobIdLabel.TextSize = 18
 
