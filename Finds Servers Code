@@ -231,7 +231,7 @@ RejointButton.MouseButton1Click:Connect(function()
 
 	wait(2)
 	
--- Connecte l'auto-rejoin avant le kick
+-- Code Pour rejoin
 	getgenv().rejoin = game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(Kick)
 		if Kick.Name == 'ErrorPrompt' and Kick:FindFirstChild('MessageArea') and Kick.MessageArea:FindFirstChild("ErrorFrame") then
 			game:GetService("TeleportService"):Teleport(game.PlaceId)
