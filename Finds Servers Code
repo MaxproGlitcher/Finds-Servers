@@ -42,7 +42,7 @@ titleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 titleLabel.Size = UDim2.new(1, 0, 0, 40)
 titleLabel.Position = UDim2.new(0.5, 0, 0, 20)
 titleLabel.Font = Enum.Font.Ubuntu
-titleLabel.Text = "Find Servers By MaxproGlitcher V 1.7"
+titleLabel.Text = "Find Servers By MaxproGlitcher V 1.8"
 titleLabel.TextColor3 = Color3.new(1, 1, 1)
 titleLabel.TextSize = 24
 titleLabel.BackgroundTransparency = 1
@@ -213,6 +213,36 @@ closeBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
+
+-- Bouton Rejoint le server
+local RejointButton = Instance.new("ImageButton", mainFrame)
+RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
+RejointButton.Size = UDim2.new(0, 40, 0, 40)
+RejointButton.Position = UDim2.new(0.5, 80, 0.5, -220)
+RejointButton.Image = "http://www.roblox.com/asset/?id=103864549538113"
+RejointButton.BackgroundTransparency = 1
+RejointButton.ZIndex = 2
+
+RejointButton.MouseButton1Click:Connect(function()
+	game:GetService("StarterGui"):SetCore("SendNotification", {
+		Title = "Rejoindre...",
+		Text = "Tentative de reconnexion..."
+	})
+
+	wait(2)
+	
+-- Connecte l'auto-rejoin avant le kick
+	getgenv().rejoin = game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(Kick)
+		if Kick.Name == 'ErrorPrompt' and Kick:FindFirstChild('MessageArea') and Kick.MessageArea:FindFirstChild("ErrorFrame") then
+			game:GetService("TeleportService"):Teleport(game.PlaceId)
+		end
+	end)
+
+	game:GetService("Players").LocalPlayer:Kick("Reconnexion...")
+end)
+
+
+
 -- Bouton pour redimensionner le GUI
 local resizeButton = Instance.new("ImageButton", mainFrame)
 resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -231,19 +261,28 @@ local function toggleGuiSize()
 		scrollFrame.Size = UDim2.new(1, 0, 1, -60)
 		scrollFrame.Position = UDim2.new(0.5, 0, 0.5, 20)
 
-		-- Repositionner les boutons après redimensionnement
+		
 		refreshBtn.Position = UDim2.new(0.5, 180, 0.5, -220)
 		closeBtn.Position = UDim2.new(0.5, 230, 0.5, -220)
 		resizeButton.Position = UDim2.new(0.5, 128, 0.5, -220)
+	    
+		RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        RejointButton.Size = UDim2.new(0, 40, 0, 40)
+        RejointButton.Position = UDim2.new(0.5, 80, 0.5, -220)
 	else
 		mainFrame.Size = UDim2.new(0, 508, 0, 300)
 		scrollFrame.Size = UDim2.new(1, 0, 1, -30)
 		scrollFrame.Position = UDim2.new(0.5, 0, 0.5, 10)
 
-		-- Repositionner les boutons après redimensionnement
+		
 		refreshBtn.Position = UDim2.new(0.5, 180, 0.5, -170)
 		closeBtn.Position = UDim2.new(0.5, 230, 0.5, -170)
 		resizeButton.Position = UDim2.new(0.5, 128, 0.5, -170)
+		
+		RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        RejointButton.Size = UDim2.new(0, 40, 0, 40)
+        RejointButton.Position = UDim2.new(0.5, 80, 0.5, -170)
+	
 	end
 	isSmall = not isSmall
 end
