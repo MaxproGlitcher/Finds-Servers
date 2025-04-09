@@ -42,7 +42,7 @@ titleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 titleLabel.Size = UDim2.new(1, 0, 0, 40)
 titleLabel.Position = UDim2.new(0.5, 0, 0, 20)
 titleLabel.Font = Enum.Font.Ubuntu
-titleLabel.Text = "Find Servers By MaxproGlitcher V 1.9"
+titleLabel.Text = "Find Servers By MaxproGlitcher V 2.0"
 titleLabel.TextColor3 = Color3.new(1, 1, 1)
 titleLabel.TextSize = 24
 titleLabel.BackgroundTransparency = 1
@@ -230,11 +230,11 @@ RejointButton.MouseButton1Click:Connect(function()
 
     wait(3)
     
-	local TeleportService = game:GetService("TeleportService")
-	local Players = game:GetService("Players")
-
-	TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, Players.LocalPlayer)
+	local ts = game:GetService("TeleportService")
+    local p = game:GetService("Players").LocalPlayer
+    ts:Teleport(game.PlaceId, p) 
 end)
+
 
 
 
