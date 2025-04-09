@@ -42,7 +42,7 @@ titleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 titleLabel.Size = UDim2.new(1, 0, 0, 40)
 titleLabel.Position = UDim2.new(0.5, 0, 0, 20)
 titleLabel.Font = Enum.Font.Ubuntu
-titleLabel.Text = "Find Servers By MaxproGlitcher V 1.8"
+titleLabel.Text = "Find Servers By MaxproGlitcher V 1.9"
 titleLabel.TextColor3 = Color3.new(1, 1, 1)
 titleLabel.TextSize = 24
 titleLabel.BackgroundTransparency = 1
@@ -159,8 +159,8 @@ function refreshServers()
 			joinserverBtn.TextSize = 18
 
 			joinserverBtn.MouseButton1Click:Connect(function()
-				game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.serverId, game.Players.LocalPlayer)
-			end)
+	           game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.id, game.Players.LocalPlayer)
+           end)
 
 			table.insert(serverFrames, serverFrame)
 
@@ -214,7 +214,6 @@ closeBtn.MouseButton1Click:Connect(function()
 end)
 
 
--- Bouton Rejoint le server
 local RejointButton = Instance.new("ImageButton", mainFrame)
 RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
 RejointButton.Size = UDim2.new(0, 40, 0, 40)
@@ -226,20 +225,17 @@ RejointButton.ZIndex = 2
 RejointButton.MouseButton1Click:Connect(function()
 	game:GetService("StarterGui"):SetCore("SendNotification", {
 		Title = "Rejoindre...",
-		Text = "Tentative de reconnexion..."
+		Text = "Reconnexion au serveur..."
 	})
 
-	wait(2)
-	
--- Code Pour rejoin
-	getgenv().rejoin = game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(Kick)
-		if Kick.Name == 'ErrorPrompt' and Kick:FindFirstChild('MessageArea') and Kick.MessageArea:FindFirstChild("ErrorFrame") then
-			game:GetService("TeleportService"):Teleport(game.PlaceId)
-		end
-	end)
+    wait(3)
+    
+	local TeleportService = game:GetService("TeleportService")
+	local Players = game:GetService("Players")
 
-	game:GetService("Players").LocalPlayer:Kick("Reconnexion...")
+	TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, Players.LocalPlayer)
 end)
+
 
 
 
