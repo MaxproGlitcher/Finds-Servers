@@ -16,5 +16,5 @@ The script allows you to be able to change servers without the need to click on 
 
 Here is the overview 
 
-![Image](https://github.com/user-attachments/assets/6708fab9-c721-40b6-aa30-5993f72dfe20)
+https://github.com/user-attachments/assets/5d62318e-23e2-4d65-8991-61048c8a1c47
 
