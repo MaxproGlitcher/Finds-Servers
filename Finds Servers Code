@@ -1,6 +1,5 @@
 --[[By MaxproGlitcher Discord:maxproglitcher
 
-   Thx Anti to contribute too fixing something on the code. Discord:convocator
    
    _____                                       ________.__  .__  __         .__                  
   /     \ _____  ___  ________________  ____  /  _____/|  | |__|/  |_  ____ |  |__   ___________ 
@@ -9,183 +8,164 @@
 \____|__  (____  /__/\_ \|   __/|__|   \____/ \______  /____/__||__|  \___  >___|  /\___  >__|   
         \/     \/      \/|__|                        \/                   \/     \/     \/    
   
-]]     
+]]  
 
 local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, game:GetService("UserInputService"):GetPlatform())
 
 getgenv().NextServer = nil
 getgenv().HasScannedAll = false
 
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
 local screenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.Size = UDim2.new(0, 500, 0, 400)
+mainFrame.Size = UDim2.new(0, 650, 0, 500)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BorderSizePixel = 0
-mainFrame.BackgroundColor3 = Color3.new(0.168627, 0.168627, 0.168627)
-mainFrame.Draggable = true -- Permet de déplacer le cadre
-mainFrame.Active = true -- Rend le cadre actif pour la détection des interactions
+mainFrame.Active = true
+mainFrame.Draggable = true
 
--- Gris pâle en haut du GUI
-local topOverlay = Instance.new("Frame", mainFrame)
-topOverlay.Size = UDim2.new(1, 0, 0, 58) -- Ajuste la hauteur ici
-topOverlay.Position = UDim2.new(0, 0, 0, 0)
-topOverlay.BackgroundColor3 = Color3.new(0.8, 0.8, 0.8) -- Gris pâle
-topOverlay.BackgroundTransparency = 0.6 -- Réglage de la transparence
-topOverlay.BorderSizePixel = 0
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "Server Finder Deluxe"
+title.Font = Enum.Font.Ubuntu
+title.TextSize = 30
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-
--- Titre
-local titleLabel = Instance.new("TextLabel", mainFrame)
-titleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-titleLabel.Size = UDim2.new(1, 0, 0, 40)
-titleLabel.Position = UDim2.new(0.5, 0, 0, 20)
-titleLabel.Font = Enum.Font.Ubuntu
-titleLabel.Text = "Find Servers By MaxproGlitcher V 2.0"
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
-titleLabel.TextSize = 24
-titleLabel.BackgroundTransparency = 1
+-- Ajout du label de version
+local versionLabel = Instance.new("TextLabel", mainFrame)
+versionLabel.Size = UDim2.new(0, 150, 0, 25)
+versionLabel.Position = UDim2.new(0, 10, 0, 10)
+versionLabel.BackgroundTransparency = 1
+versionLabel.Text = "v2.1"
+versionLabel.Font = Enum.Font.Ubuntu
+versionLabel.TextSize = 16
+versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+versionLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
-scrollFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-scrollFrame.Size = UDim2.new(1, 0, 1, -60)
-scrollFrame.Position = UDim2.new(0.5, 0, 0.5, 20)
+scrollFrame.Size = UDim2.new(1, -20, 1, -60)
+scrollFrame.Position = UDim2.new(0, 10, 0, 50)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scrollFrame.ScrollBarThickness = 6
 scrollFrame.BackgroundTransparency = 1
-scrollFrame.BorderSizePixel = 0
 
-
--- Fonction pour récupérer les serveurs
-local function GetAllServers(PlaceID)
-
-	getgenv().NextServer = nil
-	getgenv().HasScannedAll = false
-	local T = {}
-	local Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100'))
-	if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
-		getgenv().NextServer = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100&cursor=' .. Site.nextPageCursor))
-		table.insert(T,(getgenv().NextServer).data)
-
-
-		while getgenv().HasScannedAll == false do
-			task.wait()
-			if (getgenv().NextServer).nextPageCursor and (getgenv().NextServer).nextPageCursor ~= "null" and (getgenv().NextServer).nextPageCursor ~= nil then
-				getgenv().NextServer = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100&cursor=' .. (getgenv().NextServer).nextPageCursor))
-				table.insert(T,(getgenv().NextServer).data)
-			else
-				getgenv().HasScannedAll = true
-			end
-
-
-		end
-	else
-		table.insert(T,Site.data)
-	end
-
-
-	return T
-end
+local layout = Instance.new("UIListLayout", scrollFrame)
+layout.Padding = UDim.new(0, 10)
 
 local posChange = 8
 local serverFrames = {}
 
--- Rafraîchissement des serveurs
+-- Le code qui scann tout les servers publics
+
+local function GetAllServers(PlaceID)
+	getgenv().NextServer = nil
+	getgenv().HasScannedAll = false
+	local T = {}
+	local Site = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100'))
+	if Site.nextPageCursor and Site.nextPageCursor ~= "null" then
+		getgenv().NextServer = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100&cursor=' .. Site.nextPageCursor))
+		table.insert(T, (getgenv().NextServer).data)
+		while not getgenv().HasScannedAll do
+			task.wait()
+			if (getgenv().NextServer).nextPageCursor and (getgenv().NextServer).nextPageCursor ~= "null" then
+				getgenv().NextServer = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100&cursor=' .. (getgenv().NextServer).nextPageCursor))
+				table.insert(T, (getgenv().NextServer).data)
+			else
+				getgenv().HasScannedAll = true
+			end
+		end
+	else
+		table.insert(T, Site.data)
+	end
+	return T
+end
+
+local function CreateServerFrame(server)
+	local serverFrame = Instance.new("Frame", scrollFrame)
+	serverFrame.Size = UDim2.new(1, 0, 0, 120)
+	serverFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	serverFrame.BorderSizePixel = 0
+    
+	-- Textlabel Pour le nombre de joueurs, ping du servers , et le nombre Maximal du servers public.
+
+	local infoLabel = Instance.new("TextLabel", serverFrame)
+	infoLabel.Size = UDim2.new(0, 300, 0, 60)
+	infoLabel.Position = UDim2.new(0, 10, 0, 10)
+	infoLabel.BackgroundTransparency = 1
+	infoLabel.TextWrapped = true
+	infoLabel.TextXAlignment = Enum.TextXAlignment.Left
+	infoLabel.TextYAlignment = Enum.TextYAlignment.Top
+	infoLabel.Font = Enum.Font.Ubuntu
+	infoLabel.TextSize = 16
+	infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	infoLabel.Text = "Ping : " .. (server.ping or "N/A") .. "\nJoueurs : " .. server.playing .. "/" .. server.maxPlayers
+    
+	-- ID des Servers Publics
+
+	local idLabel = Instance.new("TextLabel", serverFrame)
+	idLabel.Size = UDim2.new(0, 300, 0, 20)
+	idLabel.Position = UDim2.new(0, 10, 0, 80)
+	idLabel.BackgroundTransparency = 1
+	idLabel.TextWrapped = true
+	idLabel.TextXAlignment = Enum.TextXAlignment.Left
+	idLabel.TextYAlignment = Enum.TextYAlignment.Top
+	idLabel.Font = Enum.Font.Ubuntu
+	idLabel.TextSize = 14
+	idLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	idLabel.Text = "ID : " .. server.id
+
+     -- Les button rejoint pour tout les Servers public obtenu
+
+	local joinButton = Instance.new("TextButton", serverFrame)
+	joinButton.Size = UDim2.new(0, 100, 0, 40)
+	joinButton.Position = UDim2.new(1, -110, 0.5, -20)
+	joinButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	joinButton.Text = "Join"
+	joinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	joinButton.Font = Enum.Font.Ubuntu
+	joinButton.TextSize = 18
+
+	joinButton.MouseButton1Click:Connect(function()
+		TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+	end)
+
+	table.insert(serverFrames, serverFrame)
+end
+
 function refreshServers()
 	local servers = GetAllServers(game.PlaceId)
 	if servers then
 		for _, server in pairs(servers[1]) do
-			local serverFrame = Instance.new("Frame", scrollFrame)
-			serverFrame.Position = UDim2.new(0, 4, 0, posChange)
-			serverFrame.Size = UDim2.new(0, 480, 0, 140)
-			serverFrame.BackgroundColor3 = Color3.new(0.121568, 0.121568, 0.121568)
-			serverFrame.BorderSizePixel = 0
-
-			-- ServerId Label
-			local jobIdLabel = Instance.new("TextLabel", serverFrame)
-			jobIdLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-			jobIdLabel.Size = UDim2.new(0, 320, 0, 28)
-			jobIdLabel.Position = UDim2.new(0.5, -74, 0.5, -56)
-			jobIdLabel.Font = Enum.Font.Ubuntu
-			jobIdLabel.BackgroundTransparency = 1
-			jobIdLabel.Text = "   ID: " .. server.id -- Ajout de "ID: " avant l'identifiant
-			jobIdLabel.TextColor3 = Color3.new(0.541176, 0.541176, 0.541176)
-			jobIdLabel.TextSize = 18
-
-			jobIdLabel.InputBegan:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 then
-					setclipboard(server.id)
-
-					game:GetService("StarterGui"):SetCore("SendNotification", {
-						Title = "COPIED!",
-						Text = "Server id has been copied to clipboard.",
-						Time = 4
-					})
-				end
-			end)
-
-			-- Players Label
-			local playersLabel = Instance.new("TextLabel", serverFrame)
-			playersLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-			playersLabel.Size = UDim2.new(0, 50, 0, 50)
-			playersLabel.Position = UDim2.new(0.5, -214, 0.5, 56)
-			playersLabel.Font = Enum.Font.Ubuntu
-			playersLabel.BackgroundTransparency = 1
-			playersLabel.Text = server.playing .. "/" .. server.maxPlayers
-			playersLabel.TextColor3 = Color3.new(0.541176, 0.541176, 0.541176)
-			playersLabel.TextSize = 18
-
-			-- Ping Label
-			local pingLabel = Instance.new("TextLabel", serverFrame)
-			pingLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-			pingLabel.Size = UDim2.new(0, 50, 0, 50)
-			pingLabel.Position = UDim2.new(1, -30, 0.5, 56)
-			pingLabel.Font = Enum.Font.Ubuntu
-			pingLabel.BackgroundTransparency = 1
-			pingLabel.Text = server.ping .. "ms"
-			pingLabel.TextColor3 = Color3.new(0.541176, 0.541176, 0.541176)
-			pingLabel.TextSize = 18
-
-			-- Join Server Button
-			local joinserverBtn = Instance.new("TextButton", serverFrame)
-			joinserverBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-			joinserverBtn.Size = UDim2.new(0, 100, 0, 50)
-			joinserverBtn.Position = UDim2.new(0.5, 0, 0.5, 0)
-			joinserverBtn.BackgroundColor3 = Color3.new(0.105882, 0.105882, 0.105882)
-			joinserverBtn.TextColor3 = Color3.new(0.541176, 0.541176, 0.541176)
-			joinserverBtn.Font = Enum.Font.Ubuntu
-			joinserverBtn.BorderSizePixel = 0
-			joinserverBtn.Text = "Join Server"
-			joinserverBtn.TextSize = 18
-
-			joinserverBtn.MouseButton1Click:Connect(function()
-	           game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.id, game.Players.LocalPlayer)
-           end)
-
-			table.insert(serverFrames, serverFrame)
-
+			CreateServerFrame(server)
 			posChange += 154
 		end
 	end
 end
 
--- Rafraîchir les serveurs initialement
 refreshServers()
 
--- Fermeture du GUI avec un raccourci
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessedEvent)
-	if gameProcessedEvent == true then return end
-
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
 	if input.KeyCode == Enum.KeyCode.RightControl then
 		screenGui:Destroy()
 	end
 end)
 
--- Bouton de rafraîchissement
+-- Le button Refresh 
+
 local refreshBtn = Instance.new("ImageButton", mainFrame)
 refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 refreshBtn.Size = UDim2.new(0, 50, 0, 50)
-refreshBtn.Position = UDim2.new(0.5, 180, 0.5, -220)
+refreshBtn.Position = UDim2.new(0.5, 250, 0.5, -220)
 refreshBtn.Image = "http://www.roblox.com/asset/?id=126446661859683"
 refreshBtn.BackgroundTransparency = 1
 refreshBtn.ZIndex = 2
@@ -195,16 +175,16 @@ refreshBtn.MouseButton1Click:Connect(function()
 		v:Destroy()
 	end
 	posChange = 8
-
 	table.clear(serverFrames)
 	refreshServers()
 end)
 
--- Bouton pour fermer le GUI
+-- Le button Close pour fermer le Gui Server Finder Deluxe
+
 local closeBtn = Instance.new("ImageButton", mainFrame)
 closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 closeBtn.Size = UDim2.new(0, 40, 0, 40)
-closeBtn.Position = UDim2.new(0.5, 230, 0.5, -220)
+closeBtn.Position = UDim2.new(0.5, 298, 0.5, -220)
 closeBtn.Image = "http://www.roblox.com/asset/?id=138896199949173"
 closeBtn.BackgroundTransparency = 1
 closeBtn.ZIndex = 2
@@ -213,11 +193,12 @@ closeBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
+-- Le button Rejoin pour relancer le jeux dans le servers publics
 
 local RejointButton = Instance.new("ImageButton", mainFrame)
 RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
 RejointButton.Size = UDim2.new(0, 40, 0, 40)
-RejointButton.Position = UDim2.new(0.5, 80, 0.5, -220)
+RejointButton.Position = UDim2.new(0.5, 204, 0.5, -220)
 RejointButton.Image = "http://www.roblox.com/asset/?id=103864549538113"
 RejointButton.BackgroundTransparency = 1
 RejointButton.ZIndex = 2
@@ -227,23 +208,16 @@ RejointButton.MouseButton1Click:Connect(function()
 		Title = "Rejoindre...",
 		Text = "Reconnexion au serveur..."
 	})
-
-    wait(3)
-    
-	local ts = game:GetService("TeleportService")
-    local p = game:GetService("Players").LocalPlayer
-    ts:Teleport(game.PlaceId, p) 
+	wait(3)
+	TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end)
 
+-- Button Resize Button
 
-
-
-
--- Bouton pour redimensionner le GUI
 local resizeButton = Instance.new("ImageButton", mainFrame)
 resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
 resizeButton.Size = UDim2.new(0, 40, 0, 40)
-resizeButton.Position = UDim2.new(0.5, 128, 0.5, -220)
+resizeButton.Position = UDim2.new(0.5, 157, 0.5, -220)
 resizeButton.Image = "http://www.roblox.com/asset/?id=92176830367195"
 resizeButton.BackgroundTransparency = 1
 resizeButton.ZIndex = 2
@@ -253,34 +227,50 @@ local isSmall = true -- Définir la taille initiale comme petite
 -- Fonction pour basculer entre les tailles
 local function toggleGuiSize()
 	if isSmall then
-		mainFrame.Size = UDim2.new(0, 500, 0, 400)
-		scrollFrame.Size = UDim2.new(1, 0, 1, -60)
-		scrollFrame.Position = UDim2.new(0.5, 0, 0.5, 20)
+		mainFrame.Size = UDim2.new(0, 650, 0, 500)
+		scrollFrame.Size = UDim2.new(1, -20, 1, -60)
+		scrollFrame.Position = UDim2.new(0, 10, 0, 50)
 
+		refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        refreshBtn.Size = UDim2.new(0, 50, 0, 50)
+		refreshBtn.Position = UDim2.new(0.5, 250, 0.5, -220)
 		
-		refreshBtn.Position = UDim2.new(0.5, 180, 0.5, -220)
-		closeBtn.Position = UDim2.new(0.5, 230, 0.5, -220)
-		resizeButton.Position = UDim2.new(0.5, 128, 0.5, -220)
+		closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        closeBtn.Size = UDim2.new(0, 40, 0, 40)
+		closeBtn.Position = UDim2.new(0.5, 298, 0.5, -220)
+		
+		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        resizeButton.Size = UDim2.new(0, 40, 0, 40)
+		resizeButton.Position = UDim2.new(0.5, 157, 0.5, -220)
 	    
 		RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
         RejointButton.Size = UDim2.new(0, 40, 0, 40)
-        RejointButton.Position = UDim2.new(0.5, 80, 0.5, -220)
-	else
-		mainFrame.Size = UDim2.new(0, 508, 0, 300)
-		scrollFrame.Size = UDim2.new(1, 0, 1, -30)
-		scrollFrame.Position = UDim2.new(0.5, 0, 0.5, 10)
+        RejointButton.Position = UDim2.new(0.5, 204, 0.5, -220)
+	else  -- Reste a corrigé les boutons refreshBtn ,CloseBtn, RejoinButton
+		mainFrame.Size = UDim2.new(0, 470, 0, 390)
+	    scrollFrame.Size = UDim2.new(1, -10, 1, -40)
+	    scrollFrame.Position = UDim2.new(0, 5, 0, 40)
+		
+		refreshBtn.Position = UDim2.new(0.5, 195, 0.5, -175)
+	    refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+		refreshBtn.Size = UDim2.new(0, 25, 0, 25
+	   
+	)
+		closeBtn.Position = UDim2.new(0.5, 220, 0.5, -175)
+	    closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+	    closeBtn.Size = UDim2.new(0, 25, 0, 25)
+	
+	    RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
+	    RejointButton.Size = UDim2.new(0, 25, 0, 25)
+	    RejointButton.Position = UDim2.new(0.5, 169, 0.5, -175)
 
-		
-		refreshBtn.Position = UDim2.new(0.5, 180, 0.5, -170)
-		closeBtn.Position = UDim2.new(0.5, 230, 0.5, -170)
-		resizeButton.Position = UDim2.new(0.5, 128, 0.5, -170)
-		
-		RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
-        RejointButton.Size = UDim2.new(0, 40, 0, 40)
-        RejointButton.Position = UDim2.new(0.5, 80, 0.5, -170)
+		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        resizeButton.Size = UDim2.new(0, 25, 0, 25)
+		resizeButton.Position = UDim2.new(0.5, 144, 0.5, -175)
 	
 	end
 	isSmall = not isSmall
 end
 
 resizeButton.MouseButton1Click:Connect(toggleGuiSize)
+
