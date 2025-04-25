@@ -1,4 +1,4 @@
-# Finds-Servers Deluxe
+# Finds-Servers Deluxe 💻
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxproGlitcher/Finds-Servers/refs/heads/main/Finds%20Servers%20Code"))()
 ```
@@ -8,13 +8,13 @@ The script allows you to be able to change servers without the need to click on 
 
 
 
-# Image Finds-Servers Deluxe
+# Image Finds-Servers Deluxe 👀
 ![Capture d’écran 2025-04-25 163901](https://github.com/user-attachments/assets/f45f8fd3-8061-42a9-889d-3710631f3c2f)
 
 
-# video Finds-Servers Deluxe
+# video Finds-Servers Deluxe 👀
 
-# Here is the overview 
+# Here is the overview 👀
 
 https://github.com/user-attachments/assets/5d62318e-23e2-4d65-8991-61048c8a1c47
 
