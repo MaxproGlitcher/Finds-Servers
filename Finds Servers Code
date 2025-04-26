@@ -246,14 +246,15 @@ local function toggleGuiSize()
 		RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
         RejointButton.Size = UDim2.new(0, 40, 0, 40)
         RejointButton.Position = UDim2.new(0.5, 204, 0.5, -220)
-	else  -- Reste a corrigé les boutons refreshBtn ,CloseBtn, RejoinButton
+	
+else  
 		mainFrame.Size = UDim2.new(0, 470, 0, 390)
 	    scrollFrame.Size = UDim2.new(1, -10, 1, -40)
 	    scrollFrame.Position = UDim2.new(0, 5, 0, 40)
 		
 		refreshBtn.Position = UDim2.new(0.5, 195, 0.5, -175)
 	    refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		refreshBtn.Size = UDim2.new(0, 25, 0, 25
+		refreshBtn.Size = UDim2.new(0, 30, 0, 30
 	   
 	)
 		closeBtn.Position = UDim2.new(0.5, 220, 0.5, -175)
@@ -273,4 +274,3 @@ local function toggleGuiSize()
 end
 
 resizeButton.MouseButton1Click:Connect(toggleGuiSize)
-
