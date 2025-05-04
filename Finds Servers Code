@@ -10,6 +10,50 @@
   
 ]]  
 
+local gui = Instance.new("ScreenGui", game.CoreGui)
+
+-- Texte "Chargement" placé plus haut
+local label = Instance.new("TextLabel", gui)
+label.Size = UDim2.new(0, 220, 0, 30)
+label.Position = UDim2.new(0.5, -110, 0.5, -70)
+label.BackgroundTransparency = 1
+label.Text = "Chargement"
+label.TextColor3 = Color3.new(1, 1, 1)
+label.Font = Enum.Font.SourceSansBold
+label.TextSize = 24
+
+-- Conteneur principal (noir)
+local barFrame = Instance.new("Frame", gui)
+barFrame.Size = UDim2.new(0, 200, 0, 10)
+barFrame.Position = UDim2.new(0.5, -100, 0.5, -30)
+barFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+barFrame.BorderSizePixel = 0
+
+-- Contour
+local stroke = Instance.new("UIStroke", barFrame)
+stroke.Thickness = 2
+
+-- Coins arrondis
+local corner = Instance.new("UICorner", barFrame)
+corner.CornerRadius = UDim.new(0, 5)
+
+-- Barre de progression
+local bar = Instance.new("Frame", barFrame)
+bar.Size = UDim2.new(0, 0, 1, 0)
+bar.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+bar.BorderSizePixel = 0
+
+-- Animation
+bar:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Sine", 1.5, true)
+task.wait(1.7)
+
+-- Texte après chargement
+label.Text = "Loading succes"
+task.wait(1.5)
+
+gui:Destroy()
+
+
 local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, game:GetService("UserInputService"):GetPlatform())
 
 getgenv().NextServer = nil
@@ -44,7 +88,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v2.1"
+versionLabel.Text = "v2.2"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
