@@ -10,46 +10,48 @@
   
 ]]  
 
+
+-- chargement du Gui
 local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
 
--- Texte "Chargement" placé plus haut
-local label = Instance.new("TextLabel", gui)
-label.Size = UDim2.new(0, 220, 0, 30)
-label.Position = UDim2.new(0.5, -110, 0.5, -70)
+local background = Instance.new("Frame", gui)
+background.Size = UDim2.new(1, 0, 1, 0)
+background.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+background.BackgroundTransparency = 0.2
+
+local label = Instance.new("TextLabel", background)
+label.Size = UDim2.new(0, 250, 0, 50)
+label.Position = UDim2.new(0.5, -125, 0.5, -80)
 label.BackgroundTransparency = 1
-label.Text = "Loading"
-label.TextColor3 = Color3.new(1, 1, 1)
-label.Font = Enum.Font.SourceSansBold
-label.TextSize = 24
+label.Text = "Loading..."
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.Font = Enum.Font.GothamBold
+label.TextSize = 26
 
--- Conteneur principal (noir)
-local barFrame = Instance.new("Frame", gui)
-barFrame.Size = UDim2.new(0, 200, 0, 10)
-barFrame.Position = UDim2.new(0.5, -100, 0.5, -30)
-barFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+local barFrame = Instance.new("Frame", background)
+barFrame.Size = UDim2.new(0, 300, 0, 14)
+barFrame.Position = UDim2.new(0.5, -150, 0.5, -20)
+barFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 barFrame.BorderSizePixel = 0
 
--- Contour
-local stroke = Instance.new("UIStroke", barFrame)
-stroke.Thickness = 2
+Instance.new("UICorner", barFrame).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", barFrame).Color = Color3.fromRGB(80, 80, 80)
 
--- Coins arrondis
-local corner = Instance.new("UICorner", barFrame)
-corner.CornerRadius = UDim.new(0, 5)
-
--- Barre de progression
 local bar = Instance.new("Frame", barFrame)
 bar.Size = UDim2.new(0, 0, 1, 0)
-bar.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+bar.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
 bar.BorderSizePixel = 0
 
--- Animation
-bar:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Sine", 1.5, true)
-task.wait(1.7)
+Instance.new("UICorner", bar).CornerRadius = UDim.new(0, 8)
 
--- Texte après chargement
-label.Text = "Loading succes"
-task.wait(1.5)
+bar:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Quad", 2, true)
+task.wait(2.2)
+
+label.Text = "Success!"
+label.TextColor3 = Color3.fromRGB(200, 200, 200)
+task.wait(1.2)
 
 gui:Destroy()
 
@@ -88,7 +90,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v2.2"
+versionLabel.Text = "v2.3"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
