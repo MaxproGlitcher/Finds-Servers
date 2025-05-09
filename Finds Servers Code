@@ -49,7 +49,11 @@ Instance.new("UICorner", bar).CornerRadius = UDim.new(0, 8)
 bar:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Quad", 2, true)
 task.wait(2.2)
 
-label.Text = "Success!"
+label.Text = "Server Finder Deluxe!!!"
+
+task.wait(2.2)
+
+label.Text = "Success!!!"
 label.TextColor3 = Color3.fromRGB(200, 200, 200)
 task.wait(1.2)
 
@@ -60,6 +64,7 @@ local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, game:G
 
 getgenv().NextServer = nil
 getgenv().HasScannedAll = false
+
 
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
@@ -79,22 +84,101 @@ mainFrame.Draggable = true
 
 local title = Instance.new("TextLabel", mainFrame)
 title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "Server Finder Deluxe"
 title.Font = Enum.Font.Ubuntu
 title.TextSize = 30
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Ajout du label de version
 local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v2.3"
+versionLabel.Text = "v2.5"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 versionLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Détection des périodes spéciales
+local isXmas = false
+local isHalloween = false
+local isNewYear = false
+
+pcall(function()
+	local date = os.date("*t")
+	isXmas = date.month == 12 and date.day >= 20 and date.day <= 26
+	isHalloween = (date.month == 10 and date.day >= 31) or (date.month == 11 and date.day <= 2)
+	isNewYear = (date.month == 12 and date.day >= 31) or (date.month == 1 and date.day <= 2)
+end)
+
+-- Fonction pour appliquer les effets de texte
+local function decorateTitle(startEmoji, endEmoji)
+	title.Text = startEmoji .. " Server Finder Deluxe " .. endEmoji
+	title.Position = UDim2.new(0, -28, 0, 0)
+end
+
+-- Effet Noël
+if isXmas then
+	decorateTitle("🎄", "🎄")
+	local cycleColors = {
+		Color3.fromRGB(0, 255, 0),
+		Color3.fromRGB(255, 0, 0),
+		Color3.fromRGB(255, 255, 255)
+	}
+	local index = 1
+	task.spawn(function()
+		while true do
+			title.TextColor3 = cycleColors[index]
+			versionLabel.TextColor3 = cycleColors[index]
+			index = index % #cycleColors + 1
+			task.wait(0.5)
+		end
+	end)
+end
+
+-- Effet Halloween
+if isHalloween then
+	decorateTitle("🎃", "🎃")
+	local cycleColors = {
+		Color3.fromRGB(0, 0, 0),
+		Color3.fromRGB(255, 165, 0)
+	}
+	local index = 1
+	task.spawn(function()
+		while true do
+			title.TextColor3 = cycleColors[index]
+			versionLabel.TextColor3 = cycleColors[index]
+			index = index % #cycleColors + 1
+			task.wait(0.5)
+		end
+	end)
+end
+
+-- Effet Nouvel An
+if isNewYear then
+	decorateTitle("🎉", "🎉")
+	local cycleColors = {
+		Color3.fromRGB(255, 255, 0),
+		Color3.fromRGB(0, 0, 0)
+	}
+	local index = 1
+	task.spawn(function()
+		while true do
+			title.TextColor3 = cycleColors[index]
+			versionLabel.TextColor3 = cycleColors[index]
+			index = index % #cycleColors + 1
+			task.wait(0.5)
+		end
+	end)
+end
+
+-- Si aucune fête, retour à la normale
+if not isXmas and not isHalloween and not isNewYear then
+	title.Text = "Server Finder Deluxe"
+	title.Position = UDim2.new(0, 0, 0, 0)
+end
 
 local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
 scrollFrame.Size = UDim2.new(1, -20, 1, -60)
@@ -206,8 +290,34 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
--- Le button Refresh 
+-- Fonction de notification d'erreur
+local function showError(message)
+	local notif = Instance.new("TextLabel", screenGui)
+	notif.Size = UDim2.new(0, 300, 0, 40)
+	notif.Position = UDim2.new(1, -310, 1, -50)
+	notif.AnchorPoint = Vector2.new(0, 1)
+	notif.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+	notif.Text = message
+	notif.TextColor3 = Color3.new(1,1,1)
+	notif.Font = Enum.Font.Ubuntu
+	notif.TextSize = 16
+	notif.BackgroundTransparency = 0.2
+	notif.TextXAlignment = Enum.TextXAlignment.Left
+	notif.TextYAlignment = Enum.TextYAlignment.Center
 
+	Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 8)
+
+	task.delay(4, function()
+		if notif then
+			notif:Destroy()
+		end
+	end)
+end
+
+local LocalizationService = game:GetService("LocalizationService")
+local TweenService = game:GetService("TweenService")
+
+-- Bouton Refresh avec gestion d'erreur
 local refreshBtn = Instance.new("ImageButton", mainFrame)
 refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 refreshBtn.Size = UDim2.new(0, 50, 0, 50)
@@ -216,13 +326,83 @@ refreshBtn.Image = "http://www.roblox.com/asset/?id=126446661859683"
 refreshBtn.BackgroundTransparency = 1
 refreshBtn.ZIndex = 2
 
+-- Traductions du message d'erreur
+	local translations = {
+		["fr"] = "Erreur de chargement. Réessaie.",
+		["en"] = "Error loading. Please try again.",
+		["es"] = "Error al cargar. Inténtalo de nuevo.",
+		["pt"] = "Erro ao carregar. Por favor, tente novamente.",
+		["tr"] = "Yükleme hatası. Lütfen tekrar deneyin.",
+		["it"] = "Errore nel caricamento. Riprova.",
+		["de"] = "Fehler beim Laden. Bitte versuche es erneut.",
+		["ar"] = "حدث خطأ أثناء التحميل. الرجاء المحاولة مرة أخرى.",
+		["ja"] = "読み込みエラーが発生しました。もう一度お試しください。",
+	    }
+
+local function getTranslatedMessage()
+	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
+	return translations[langCode] or translations["en"]
+end
+
+-- Notification moderne traduite
+local function showError()
+	local message = getTranslatedMessage()
+	local screenGui = mainFrame:FindFirstAncestorOfClass("ScreenGui")
+	if not screenGui then return end
+
+	local notif = Instance.new("Frame")
+	notif.Size = UDim2.new(0, 320, 0, 60)
+	notif.Position = UDim2.new(1, 340, 1, -20)
+	notif.AnchorPoint = Vector2.new(1, 1)
+	notif.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+	notif.BorderSizePixel = 0
+	notif.ZIndex = 10
+	notif.Parent = screenGui
+
+	Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 10)
+
+	local stroke = Instance.new("UIStroke", notif)
+	stroke.Color = Color3.fromRGB(0, 0, 0)
+	stroke.Thickness = 1
+
+	local label = Instance.new("TextLabel", notif)
+	label.Size = UDim2.new(1, -30, 1, 0)
+	label.Position = UDim2.new(0, 15, 0, 0)
+	label.Text = message
+	label.TextColor3 = Color3.fromRGB(0, 0, 0)
+	label.BackgroundTransparency = 1
+	label.TextSize = 16
+	label.Font = Enum.Font.GothamMedium
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.ZIndex = 11
+	label.Parent = notif
+
+	TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Position = UDim2.new(1, -20, 1, -20)
+	}):Play()
+
+	task.delay(3, function()
+		local tween = TweenService:Create(notif, TweenInfo.new(0.3), {
+			BackgroundTransparency = 1,
+			Position = UDim2.new(1, 340, 1, -20)
+		})
+		tween:Play()
+		tween.Completed:Wait()
+		notif:Destroy()
+	end)
+end
+
 refreshBtn.MouseButton1Click:Connect(function()
 	for _, v in pairs(serverFrames) do
 		v:Destroy()
 	end
 	posChange = 8
 	table.clear(serverFrames)
-	refreshServers()
+
+	local success, err = pcall(refreshServers)
+	if not success then
+		showError()
+	end
 end)
 
 -- Le button Close pour fermer le Gui Server Finder Deluxe
