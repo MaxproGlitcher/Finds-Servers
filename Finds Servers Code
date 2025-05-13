@@ -95,7 +95,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v2.5"
+versionLabel.Text = "v2.6"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -105,12 +105,14 @@ versionLabel.TextXAlignment = Enum.TextXAlignment.Left
 local isXmas = false
 local isHalloween = false
 local isNewYear = false
+local isEaster = false
 
 pcall(function()
 	local date = os.date("*t")
 	isXmas = date.month == 12 and date.day >= 20 and date.day <= 26
 	isHalloween = (date.month == 10 and date.day >= 31) or (date.month == 11 and date.day <= 2)
 	isNewYear = (date.month == 12 and date.day >= 31) or (date.month == 1 and date.day <= 2)
+	isEaster = (date.month == 3 and date.day >= 31) or (date.month == 4 and date.day <= 15)
 end)
 
 -- Fonction pour appliquer les effets de texte
@@ -174,11 +176,32 @@ if isNewYear then
 	end)
 end
 
+-- Effet Pâques
+if isEaster then
+	decorateTitle("🐰", "🐰")
+	local cycleColors = {
+		Color3.fromRGB(216, 191, 216),
+		Color3.fromRGB(255, 182, 193),
+		Color3.fromRGB(193, 225, 193),
+		Color3.fromRGB(173, 216, 230)
+	}
+	local index = 1
+	task.spawn(function()
+		while true do
+			title.TextColor3 = cycleColors[index]
+			versionLabel.TextColor3 = cycleColors[index]
+			index = index % #cycleColors + 1
+			task.wait(0.5)
+		end
+	end)
+end
+
 -- Si aucune fête, retour à la normale
-if not isXmas and not isHalloween and not isNewYear then
+if not isXmas and not isHalloween and not isNewYear and not isEaster then
 	title.Text = "Server Finder Deluxe"
 	title.Position = UDim2.new(0, 0, 0, 0)
 end
+
 
 local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
 scrollFrame.Size = UDim2.new(1, -20, 1, -60)
@@ -421,22 +444,99 @@ end)
 
 -- Le button Rejoin pour relancer le jeux dans le servers publics
 
-local RejointButton = Instance.new("ImageButton", mainFrame)
-RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
-RejointButton.Size = UDim2.new(0, 40, 0, 40)
-RejointButton.Position = UDim2.new(0.5, 204, 0.5, -220)
-RejointButton.Image = "http://www.roblox.com/asset/?id=103864549538113"
-RejointButton.BackgroundTransparency = 1
-RejointButton.ZIndex = 2
+local TweenService = game:GetService("TweenService")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalizationService = game:GetService("LocalizationService")
+local LocalPlayer = Players.LocalPlayer
 
-RejointButton.MouseButton1Click:Connect(function()
-	game:GetService("StarterGui"):SetCore("SendNotification", {
-		Title = "Rejoindre...",
-		Text = "Reconnexion au serveur..."
-	})
-	wait(3)
-	TeleportService:Teleport(game.PlaceId, LocalPlayer)
-end)
+local langText = {
+	fr = "Reconnexion au serveur...",
+	en = "Reconnecting to server...",
+	es = "Reconectando al servidor...",
+	de = "Wiederverbindung zum Server...",
+	it = "Riconnessione al server...",
+	pt = "Reconectando ao servidor...",
+	ru = "Переподключение к серверу...",
+	zh = "正在重新连接服务器...",
+	ja = "サーバーに再接続中..."
+}
+
+local function getTranslatedMessage()
+	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
+	return langText[langCode] or langText["en"]
+end
+
+-- Notification moderne traduite
+local function Translated()
+	local message = getTranslatedMessage()
+	local screenGui = mainFrame:FindFirstAncestorOfClass("ScreenGui")
+	if not screenGui then return end
+
+	local notifFrame = Instance.new("Frame")
+	notifFrame.Size = UDim2.new(0, 320, 0, 60)
+	notifFrame.Position = UDim2.new(1, 300, 1, -20)
+	notifFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	notifFrame.BackgroundTransparency = 0.2
+	notifFrame.BorderSizePixel = 0
+	notifFrame.AnchorPoint = Vector2.new(1, 1)
+	notifFrame.Visible = false
+	notifFrame.ZIndex = 5
+	notifFrame.Parent = screenGui
+
+	Instance.new("UICorner", notifFrame).CornerRadius = UDim.new(0, 10)
+	local stroke = Instance.new("UIStroke", notifFrame)
+	stroke.Color = Color3.fromRGB(0, 0, 0)
+	stroke.Thickness = 1
+
+	local notifText = Instance.new("TextLabel", notifFrame)
+	notifText.Size = UDim2.new(1, -30, 1, 0)
+	notifText.Position = UDim2.new(0, 15, 0, 0)
+	notifText.BackgroundTransparency = 1
+	notifText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	notifText.Font = Enum.Font.GothamMedium
+	notifText.TextSize = 16
+	notifText.TextScaled = false
+	notifText.TextXAlignment = Enum.TextXAlignment.Left
+	notifText.ZIndex = 6
+
+	notifText.Text = message -- Set the translated text for the notification
+
+	local RejointButton = Instance.new("ImageButton", screenGui)
+	RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
+	RejointButton.Size = UDim2.new(0, 40, 0, 40)
+	RejointButton.Position = UDim2.new(0.5, 204, 0.5, -220)
+	RejointButton.Image = "http://www.roblox.com/asset/?id=103864549538113"
+	RejointButton.BackgroundTransparency = 1
+	RejointButton.ZIndex = 2
+
+	RejointButton.MouseButton1Click:Connect(function()
+		notifText.Text = getTranslatedMessage() -- Update the text for the translation
+		notifFrame.Visible = true
+
+		TweenService:Create(notifFrame, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			Position = UDim2.new(1, -20, 1, -20)
+		}):Play()
+
+		task.delay(3, function()
+			local tween = TweenService:Create(notifFrame, TweenInfo.new(0.3), {
+				BackgroundTransparency = 1,
+				Position = UDim2.new(1, 300, 1, -20)
+			})
+			tween:Play()
+			tween.Completed:Wait()
+			notifFrame.Visible = false
+			notifFrame.BackgroundTransparency = 0.2
+			notifFrame.Position = UDim2.new(1, 300, 1, -20)
+		end)
+
+		TeleportService:Teleport(game.PlaceId, LocalPlayer)
+	end)
+end
+
+-- Appel de la fonction Translated pour afficher la notification
+Translated()
+
 
 -- Button Resize Button
 
