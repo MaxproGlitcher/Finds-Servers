@@ -95,7 +95,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v2.7"
+versionLabel.Text = "v2.8"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -276,7 +276,7 @@ local function CreateServerFrame(server)
 	idLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 	idLabel.Text = "ID : " .. server.id
 
-     -- Les button rejoint pour tout les Servers public obtenu
+     -- Les buttons rejoint pour tout les Servers public obtenu
 
 	local joinButton = Instance.new("TextButton", serverFrame)
 	joinButton.Size = UDim2.new(0, 100, 0, 40)
@@ -360,7 +360,11 @@ refreshBtn.ZIndex = 2
 		["de"] = "Fehler beim Laden. Bitte versuche es erneut.",
 		["ar"] = "حدث خطأ أثناء التحميل. الرجاء المحاولة مرة أخرى.",
 		["ja"] = "読み込みエラーが発生しました。もう一度お試しください。",
-	    }
+	    ["tr"] = "Sunucuya yeniden bağlanılıyor...",
+	    ["ru"] = "Ошибка загрузки. Пожалуйста, попробуйте еще раз.",
+        ["zh"] = "加载错误。请重试。",
+}
+	
 
 local function getTranslatedMessage()
 	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
@@ -442,7 +446,7 @@ closeBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
--- Le button Rejoin pour relancer le jeux dans le servers publics
+-- Le Code du button Rejoin pour relancer le jeux dans le même servers publics
 
 local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
@@ -451,15 +455,17 @@ local LocalizationService = game:GetService("LocalizationService")
 local LocalPlayer = Players.LocalPlayer
 
 local langText = {
-	fr = "Reconnexion au serveur...",
-	en = "Reconnecting to server...",
-	es = "Reconectando al servidor...",
-	de = "Wiederverbindung zum Server...",
-	it = "Riconnessione al server...",
-	pt = "Reconectando ao servidor...",
-	ru = "Переподключение к серверу...",
-	zh = "正在重新连接服务器...",
-	ja = "サーバーに再接続中..."
+	["fr"] = "Reconnexion au serveur...",
+	["en"] = "Reconnecting to server...",
+	["es"] = "Reconectando al servidor...",
+	["de"] = "Wiederverbindung zum Server...",
+	["it"] = "Riconnessione al server...",
+	["pt"] = "Reconectando ao servidor...",
+	["ru"] = "Переподключение к серверу...",
+	["zh"] = "正在重新连接服务器...",
+	["tr"] = "Sunucuya yeniden bağlanılıyor...",
+	["ja"] = "サーバーに再接続中...",
+	["ar"] = "إعادة الاتصال بالخادم...",
 }
 
 local function getTranslatedMessage()
@@ -469,7 +475,7 @@ end
 
 local function Translated(mainFrame)
 	if not mainFrame then return end
-	
+
 	local screenGui = mainFrame:FindFirstAncestorOfClass("ScreenGui")
 	if not screenGui then return end
 
@@ -498,7 +504,6 @@ local function Translated(mainFrame)
 	notifText.TextSize = 16
 	notifText.TextXAlignment = Enum.TextXAlignment.Left
 	notifText.ZIndex = 6
-
 	notifText.Text = getTranslatedMessage()
 
 	local RejoinButton = Instance.new("ImageButton", mainFrame)
@@ -533,8 +538,8 @@ local function Translated(mainFrame)
 	end)
 end
 
-
 Translated(mainFrame)
+
 
 
 
