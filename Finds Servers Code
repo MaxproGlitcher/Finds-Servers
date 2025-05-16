@@ -533,7 +533,7 @@ local function Translated(mainFrame)
 	end)
 end
 
--- N'oublie pas de passer ici ta variable mainFrame existante
+
 Translated(mainFrame)
 
 
