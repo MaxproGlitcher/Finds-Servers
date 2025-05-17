@@ -260,7 +260,7 @@ local function CreateServerFrame(server)
 	infoLabel.Font = Enum.Font.Ubuntu
 	infoLabel.TextSize = 16
 	infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	infoLabel.Text = "Ping : " .. (server.ping or "N/A") .. "\nJoueurs : " .. server.playing .. "/" .. server.maxPlayers
+	infoLabel.Text = "Ping : " .. (server.ping or "N/A") .. "\nPlayers : " .. server.playing .. "/" .. server.maxPlayers
     
 	-- ID des Servers Publics
 
