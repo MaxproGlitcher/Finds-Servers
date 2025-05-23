@@ -10,9 +10,10 @@
   
 ]]  
 
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- chargement du Gui
 local gui = Instance.new("ScreenGui", game.CoreGui)
+local RejoinButton = Instance.new("ImageButton")
 gui.IgnoreGuiInset = true
 gui.ResetOnSpawn = false
 
@@ -59,6 +60,7 @@ task.wait(1.2)
 
 gui:Destroy()
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, game:GetService("UserInputService"):GetPlatform())
 
@@ -95,11 +97,13 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v2.8"
+versionLabel.Text = "v3.0"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 versionLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Détection des périodes spéciales
 local isXmas = false
@@ -201,8 +205,7 @@ if not isXmas and not isHalloween and not isNewYear and not isEaster then
 	title.Text = "Server Finder Deluxe"
 	title.Position = UDim2.new(0, 0, 0, 0)
 end
-
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
 scrollFrame.Size = UDim2.new(1, -20, 1, -60)
 scrollFrame.Position = UDim2.new(0, 10, 0, 50)
@@ -223,31 +226,35 @@ local function GetAllServers(PlaceID)
 	getgenv().NextServer = nil
 	getgenv().HasScannedAll = false
 	local T = {}
-	local Site = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100'))
-	if Site.nextPageCursor and Site.nextPageCursor ~= "null" then
-		getgenv().NextServer = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100&cursor=' .. Site.nextPageCursor))
-		table.insert(T, (getgenv().NextServer).data)
-		while not getgenv().HasScannedAll do
-			task.wait()
-			if (getgenv().NextServer).nextPageCursor and (getgenv().NextServer).nextPageCursor ~= "null" then
-				getgenv().NextServer = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100&cursor=' .. (getgenv().NextServer).nextPageCursor))
-				table.insert(T, (getgenv().NextServer).data)
-			else
-				getgenv().HasScannedAll = true
+	xpcall(function()
+		local Site = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100'))
+		if Site.nextPageCursor and Site.nextPageCursor ~= "null" then
+			getgenv().NextServer = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100&cursor=' .. Site.nextPageCursor))
+			table.insert(T, (getgenv().NextServer).data)
+			while not getgenv().HasScannedAll do
+				task.wait()
+				if (getgenv().NextServer).nextPageCursor and (getgenv().NextServer).nextPageCursor ~= "null" then
+					getgenv().NextServer = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Desc&limit=100&cursor=' .. (getgenv().NextServer).nextPageCursor))
+					table.insert(T, (getgenv().NextServer).data)
+				else
+					getgenv().HasScannedAll = true
+				end
 			end
+		else
+			table.insert(T, Site.data)
 		end
-	else
-		table.insert(T, Site.data)
-	end
+	end,function()
+
+	end)
 	return T
 end
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 local function CreateServerFrame(server)
 	local serverFrame = Instance.new("Frame", scrollFrame)
 	serverFrame.Size = UDim2.new(1, 0, 0, 120)
 	serverFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	serverFrame.BorderSizePixel = 0
-    
+
 	-- Textlabel Pour le nombre de joueurs, ping du servers , et le nombre Maximal du servers public.
 
 	local infoLabel = Instance.new("TextLabel", serverFrame)
@@ -261,7 +268,7 @@ local function CreateServerFrame(server)
 	infoLabel.TextSize = 16
 	infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	infoLabel.Text = "Ping : " .. (server.ping or "N/A") .. "\nPlayers : " .. server.playing .. "/" .. server.maxPlayers
-    
+
 	-- ID des Servers Publics
 
 	local idLabel = Instance.new("TextLabel", serverFrame)
@@ -276,7 +283,7 @@ local function CreateServerFrame(server)
 	idLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 	idLabel.Text = "ID : " .. server.id
 
-     -- Les buttons rejoint pour tout les Servers public obtenu
+	-- Les buttons rejoint pour tout les Servers public obtenu
 
 	local joinButton = Instance.new("TextButton", serverFrame)
 	joinButton.Size = UDim2.new(0, 100, 0, 40)
@@ -294,15 +301,33 @@ local function CreateServerFrame(server)
 	table.insert(serverFrames, serverFrame)
 end
 
-function refreshServers()
-	local servers = GetAllServers(game.PlaceId)
-	if servers then
-		for _, server in pairs(servers[1]) do
-			CreateServerFrame(server)
-			posChange += 154
-		end
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Global
+
+
+local allServers = {}
+
+function updateServerList(servers)
+	for _, v in pairs(serverFrames) do
+		v:Destroy()
+	end
+	posChange = 8
+	table.clear(serverFrames)
+
+	for _, server in ipairs(servers) do
+		CreateServerFrame(server)
+		posChange += 154
 	end
 end
+
+function refreshServers()
+	local servers = GetAllServers(game.PlaceId)
+	if servers and not (servers == {}) then
+		allServers = servers[1]
+		updateServerList(allServers)
+	end
+end
+
 
 refreshServers()
 
@@ -312,6 +337,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		screenGui:Destroy()
 	end
 end)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Fonction de notification d'erreur
 local function showError(message)
@@ -350,21 +377,21 @@ refreshBtn.BackgroundTransparency = 1
 refreshBtn.ZIndex = 2
 
 -- Traductions du message d'erreur
-	local translations = {
-		["fr"] = "Erreur de chargement. Réessaie.",
-		["en"] = "Error loading. Please try again.",
-		["es"] = "Error al cargar. Inténtalo de nuevo.",
-		["pt"] = "Erro ao carregar. Por favor, tente novamente.",
-		["tr"] = "Yükleme hatası. Lütfen tekrar deneyin.",
-		["it"] = "Errore nel caricamento. Riprova.",
-		["de"] = "Fehler beim Laden. Bitte versuche es erneut.",
-		["ar"] = "حدث خطأ أثناء التحميل. الرجاء المحاولة مرة أخرى.",
-	        ["ja"] = "読み込みエラーが発生しました。もう一度お試しください。",
-	        ["tr"] = "Sunucuya yeniden bağlanılıyor...",
-	        ["ru"] = "Ошибка загрузки. Пожалуйста, попробуйте еще раз.",
-                ["zh"] = "加载错误。请重试。",
+local translations = {
+	["fr"] = "Erreur de chargement. Réessaie.",
+	["en"] = "Error loading. Please try again.",
+	["es"] = "Error al cargar. Inténtalo de nuevo.",
+	["pt"] = "Erro ao carregar. Por favor, tente novamente.",
+	["tr"] = "Yükleme hatası. Lütfen tekrar deneyin.",
+	["it"] = "Errore nel caricamento. Riprova.",
+	["de"] = "Fehler beim Laden. Bitte versuche es erneut.",
+	["ar"] = "حدث خطأ أثناء التحميل. الرجاء المحاولة مرة أخرى.",
+	["ja"] = "読み込みエラーが発生しました。もう一度お試しください。",
+	["tr"] = "Sunucuya yeniden bağlanılıyor...",
+	["ru"] = "Ошибка загрузки. Пожалуйста, попробуйте еще раз.",
+	["zh"] = "加载错误。请重试。",
 }
-	
+
 
 local function getTranslatedMessage()
 	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
@@ -431,7 +458,52 @@ refreshBtn.MouseButton1Click:Connect(function()
 		showError()
 	end
 end)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+local function sortServers(servers, currentSort)
+	if currentSort == "fastest" then
+		table.sort(servers, function(a, b)
+			return (a.ping or 9999) < (b.ping or 9999)
+		end)
+	elseif currentSort == "lowPlayers" then
+		table.sort(servers, function(a, b)
+			return a.playing < b.playing
+		end)
+	elseif currentSort == "maxPlayers" then
+		table.sort(servers, function(a, b)
+			return a.playing > b.playing
+		end)
+	end
+	return servers
+end
+
+local lowPlayersBtn = Instance.new("ImageButton", mainFrame)
+lowPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+lowPlayersBtn.Size = UDim2.new(0, 40, 0, 40)
+lowPlayersBtn.Position = UDim2.new(0.5, -210, 0.5, -220)
+lowPlayersBtn.Image = "http://www.roblox.com/asset/?id=78395837711238"
+lowPlayersBtn.BackgroundTransparency = 1
+lowPlayersBtn.ZIndex = 2
+
+local maxPlayersBtn = Instance.new("ImageButton", mainFrame)
+maxPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+maxPlayersBtn.Size = UDim2.new(0, 40, 0, 40)
+maxPlayersBtn.Position = UDim2.new(0.5, -260, 0.5, -220)
+maxPlayersBtn.Image = "http://www.roblox.com/asset/?id=117409611207958"
+maxPlayersBtn.BackgroundTransparency = 1
+maxPlayersBtn.ZIndex = 2
+
+lowPlayersBtn.MouseButton1Click:Connect(function()
+	local sorted = sortServers(allServers, "lowPlayers")
+	updateServerList(sorted)
+end)
+
+maxPlayersBtn.MouseButton1Click:Connect(function()
+	local sorted = sortServers(allServers, "maxPlayers")
+	updateServerList(sorted)
+end)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Le button Close pour fermer le Gui Server Finder Deluxe
 
 local closeBtn = Instance.new("ImageButton", mainFrame)
@@ -446,6 +518,7 @@ closeBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Le Code du button Rejoin pour relancer le jeux dans le même servers publics
 
 local TweenService = game:GetService("TweenService")
@@ -506,7 +579,7 @@ local function Translated(mainFrame)
 	notifText.ZIndex = 6
 	notifText.Text = getTranslatedMessage()
 
-	local RejoinButton = Instance.new("ImageButton", mainFrame)
+	RejoinButton.Parent = mainFrame
 	RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
 	RejoinButton.Size = UDim2.new(0, 40, 0, 40)
 	RejoinButton.Position = UDim2.new(0.5, 204, 0.5, -220)
@@ -542,7 +615,7 @@ Translated(mainFrame)
 
 
 
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Button Resize Button
 
 local resizeButton = Instance.new("ImageButton", mainFrame)
@@ -563,43 +636,58 @@ local function toggleGuiSize()
 		scrollFrame.Position = UDim2.new(0, 10, 0, 50)
 
 		refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-        refreshBtn.Size = UDim2.new(0, 50, 0, 50)
+		refreshBtn.Size = UDim2.new(0, 50, 0, 50)
 		refreshBtn.Position = UDim2.new(0.5, 250, 0.5, -220)
-		
+
 		closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-        closeBtn.Size = UDim2.new(0, 40, 0, 40)
+		closeBtn.Size = UDim2.new(0, 40, 0, 40)
 		closeBtn.Position = UDim2.new(0.5, 298, 0.5, -220)
-		
-		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
-        resizeButton.Size = UDim2.new(0, 40, 0, 40)
-		resizeButton.Position = UDim2.new(0.5, 157, 0.5, -220)
-	    
-		RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
-        RejointButton.Size = UDim2.new(0, 40, 0, 40)
-        RejointButton.Position = UDim2.new(0.5, 204, 0.5, -220)
-	
-else  
-		mainFrame.Size = UDim2.new(0, 470, 0, 390)
-	    scrollFrame.Size = UDim2.new(1, -10, 1, -40)
-	    scrollFrame.Position = UDim2.new(0, 5, 0, 40)
-		
-		refreshBtn.Position = UDim2.new(0.5, 195, 0.5, -175)
-	    refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		refreshBtn.Size = UDim2.new(0, 30, 0, 30
-	   
-	)
-		closeBtn.Position = UDim2.new(0.5, 220, 0.5, -175)
-	    closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-	    closeBtn.Size = UDim2.new(0, 25, 0, 25)
-	
-	    RejointButton.AnchorPoint = Vector2.new(0.5, 0.5)
-	    RejointButton.Size = UDim2.new(0, 25, 0, 25)
-	    RejointButton.Position = UDim2.new(0.5, 169, 0.5, -175)
 
 		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
-        resizeButton.Size = UDim2.new(0, 25, 0, 25)
-		resizeButton.Position = UDim2.new(0.5, 144, 0.5, -175)
-	
+		resizeButton.Size = UDim2.new(0, 40, 0, 40)
+		resizeButton.Position = UDim2.new(0.5, 157, 0.5, -220)
+
+		RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
+		RejoinButton.Size = UDim2.new(0, 40, 0, 40)
+		RejoinButton.Position = UDim2.new(0.5, 204, 0.5, -220)
+
+		lowPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+		lowPlayersBtn.Size = UDim2.new(0, 40, 0, 40)
+		lowPlayersBtn.Position = UDim2.new(0.5, -210, 0.5, -220)
+
+		maxPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+		maxPlayersBtn.Size = UDim2.new(0, 40, 0, 40)
+		maxPlayersBtn.Position = UDim2.new(0.5, -260, 0.5, -220)
+
+	else  
+		mainFrame.Size = UDim2.new(0, 549, 0, 390)
+		scrollFrame.Size = UDim2.new(1, -10, 1, -40)
+		scrollFrame.Position = UDim2.new(0, 5, 0, 40)
+
+		refreshBtn.Position = UDim2.new(0.5, 225, 0.5, -175)
+		refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+		refreshBtn.Size = UDim2.new(0, 30, 0, 30)
+		
+		closeBtn.Position = UDim2.new(0.5, 255, 0.5, -175)
+		closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+		closeBtn.Size = UDim2.new(0, 25, 0, 25)
+
+		RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
+		RejoinButton.Size = UDim2.new(0, 25, 0, 25)
+		RejoinButton.Position = UDim2.new(0.5, 195, 0.5, -175)
+
+		maxPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+		maxPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
+		maxPlayersBtn.Position = UDim2.new(0.5, -222, 0.5, -175)
+
+		lowPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+		lowPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
+		lowPlayersBtn.Position = UDim2.new(0.5, -200, 0.5, -175)
+
+		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
+		resizeButton.Size = UDim2.new(0, 25, 0, 25)
+		resizeButton.Position = UDim2.new(0.5, 167, 0.5, -175)
+
 	end
 	isSmall = not isSmall
 end
