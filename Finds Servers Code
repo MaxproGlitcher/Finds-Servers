@@ -11,7 +11,9 @@
 ]]  
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 -- chargement du Gui
+
 local gui = Instance.new("ScreenGui", game.CoreGui)
 local RejoinButton = Instance.new("ImageButton")
 gui.IgnoreGuiInset = true
@@ -68,6 +70,7 @@ getgenv().NextServer = nil
 getgenv().HasScannedAll = false
 
 
+
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
@@ -84,6 +87,25 @@ mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- protection lors du screen shot le Gui deviendras invisible lors du screen shot
+
+local CaptureService = game:GetService("CaptureService")
+CaptureService.CaptureBegan:Connect(function()
+    screenGui.Enabled = false
+end)
+
+CaptureService.CaptureEnded:Connect(function()
+    task.delay(0.5, function()
+        screenGui.Enabled = true
+    end)
+end)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- Titre du Gui et la Version
+
 local title = Instance.new("TextLabel", mainFrame)
 title.Size = UDim2.new(1, 0, 0, 40)
 title.Position = UDim2.new(0, 0, 0, 0)
@@ -97,7 +119,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v3.0"
+versionLabel.Text = "v3.1"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -106,10 +128,12 @@ versionLabel.TextXAlignment = Enum.TextXAlignment.Left
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Détection des périodes spéciales
+
 local isXmas = false
 local isHalloween = false
 local isNewYear = false
 local isEaster = false
+local isValentineDay = false
 
 pcall(function()
 	local date = os.date("*t")
@@ -117,6 +141,7 @@ pcall(function()
 	isHalloween = (date.month == 10 and date.day >= 31) or (date.month == 11 and date.day <= 2)
 	isNewYear = (date.month == 12 and date.day >= 31) or (date.month == 1 and date.day <= 2)
 	isEaster = (date.month == 3 and date.day >= 31) or (date.month == 4 and date.day <= 15)
+	isValentineDay = (date.month == 2 and date.day == 14)
 end)
 
 -- Fonction pour appliquer les effets de texte
@@ -200,12 +225,33 @@ if isEaster then
 	end)
 end
 
+-- Effet ValentineDay
+if isValentineDay then
+	decorateTitle("💗", "💗")
+	local cycleColors = { 
+		Color3.fromRGB(0, 0, 0),
+		Color3.fromRGB( 255, 85, 127)
+	}
+	local index = 1
+	task.spawn(function()
+		while true do
+			title.TextColor3 = cycleColors[index]
+			versionLabel.TextColor3 = cycleColors[index]
+			index = index % #cycleColors + 1
+			task.wait(0.5)
+		end
+	end)
+end
+
+
 -- Si aucune fête, retour à la normale
-if not isXmas and not isHalloween and not isNewYear and not isEaster then
+if not isXmas and not isHalloween and not isNewYear and not isEaster and not isValentineDay then
 	title.Text = "Server Finder Deluxe"
 	title.Position = UDim2.new(0, 0, 0, 0)
 end
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
 scrollFrame.Size = UDim2.new(1, -20, 1, -60)
 scrollFrame.Position = UDim2.new(0, 10, 0, 50)
@@ -249,6 +295,9 @@ local function GetAllServers(PlaceID)
 	return T
 end
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- Frame avec les Pings des connections des servers public et le nombre de players dans les servers publics
+
 local function CreateServerFrame(server)
 	local serverFrame = Instance.new("Frame", scrollFrame)
 	serverFrame.Size = UDim2.new(1, 0, 0, 120)
@@ -302,8 +351,8 @@ local function CreateServerFrame(server)
 end
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Global
 
+-- Global Servers
 
 local allServers = {}
 
@@ -341,6 +390,7 @@ end)
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Fonction de notification d'erreur
+
 local function showError(message)
 	local notif = Instance.new("TextLabel", screenGui)
 	notif.Size = UDim2.new(0, 300, 0, 40)
@@ -460,6 +510,8 @@ refreshBtn.MouseButton1Click:Connect(function()
 end)
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+-- Le button Low Players et Max Players
+
 local function sortServers(servers, currentSort)
 	if currentSort == "fastest" then
 		table.sort(servers, function(a, b)
@@ -504,6 +556,7 @@ maxPlayersBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 -- Le button Close pour fermer le Gui Server Finder Deluxe
 
 local closeBtn = Instance.new("ImageButton", mainFrame)
@@ -519,6 +572,7 @@ closeBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 -- Le Code du button Rejoin pour relancer le jeux dans le même servers publics
 
 local TweenService = game:GetService("TweenService")
@@ -613,9 +667,8 @@ end
 
 Translated(mainFrame)
 
-
-
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 -- Button Resize Button
 
 local resizeButton = Instance.new("ImageButton", mainFrame)
