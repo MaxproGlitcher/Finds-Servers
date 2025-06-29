@@ -9,12 +9,12 @@ The script allows you to be able to change servers without the need to click on 
 
 
 # Image Finds-Servers Deluxe script 👀
-![Image](https://github.com/user-attachments/assets/4156f865-c1bf-4099-8598-dcad21c3ea41)
+![Image](https://github.com/user-attachments/assets/9ddac041-30e9-4443-b501-da807a3f2e85)
 
 
 # video Finds-Server Deluxe script 👀
 
 # Here is the overview 👀
 
-https://github.com/user-attachments/assets/3b2bb6e7-65e1-494c-921d-daad2b701890
+https://github.com/user-attachments/assets/b807f9f6-ec54-416b-affe-e6ff7bd66de8
 
