@@ -119,7 +119,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v3.5"
+versionLabel.Text = "v3.6"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -577,11 +577,78 @@ end)
 
 --Buttons pour copy le server public ou nous somme live!!!
 
+local TweenService = game:GetService("TweenService")
+local LocalizationService = game:GetService("LocalizationService")
+
+local langText = {
+	["fr"] = "L'ID du serveur a été copié avec succès !",
+	["en"] = "Server ID copied successfully!",
+	["es"] = "¡ID del servidor copiado correctamente!",
+	["de"] = "Server-ID erfolgreich kopiert!",
+	["it"] = "ID del server copiato con successo!",
+	["pt"] = "ID do servidor copiado com sucesso!",
+	["ru"] = "ID сервера успешно скопирован!",
+	["zh"] = "服务器ID复制成功！",
+	["tr"] = "Sunucu kimliği başarıyla kopyalandı!",
+	["ja"] = "サーバーIDが正常にコピーされました！",
+	["ar"] = "تم نسخ معرف الخادم بنجاح!",
+}
+
+local function getTranslatedText()
+	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
+	return langText[langCode] or langText["en"]
+end
+
+local function showNotif(screenGui, message)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 320, 0, 60)
+	frame.Position = UDim2.new(1, 300, 1, -20)
+	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	frame.BackgroundTransparency = 0.2
+	frame.BorderSizePixel = 0
+	frame.AnchorPoint = Vector2.new(1, 1)
+	frame.Visible = false
+	frame.ZIndex = 5
+	frame.Parent = screenGui
+
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+	local stroke = Instance.new("UIStroke", frame)
+	stroke.Color = Color3.fromRGB(0, 0, 0)
+	stroke.Thickness = 1
+
+	local label = Instance.new("TextLabel", frame)
+	label.Size = UDim2.new(1, -30, 1, 0)
+	label.Position = UDim2.new(0, 15, 0, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.Font = Enum.Font.GothamMedium
+	label.TextSize = 16
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.ZIndex = 6
+	label.Text = message
+
+	frame.Visible = true
+	TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Position = UDim2.new(1, -20, 1, -20)
+	}):Play()
+
+	task.delay(3, function()
+		local tween = TweenService:Create(frame, TweenInfo.new(0.3), {
+			BackgroundTransparency = 1,
+			Position = UDim2.new(1, 300, 1, -20)
+		})
+		tween:Play()
+		tween.Completed:Wait()
+		frame:Destroy()
+	end)
+end
+
+-- Bouton CopyGamelive avec notif
 local CopyGamelive = Instance.new("ImageButton", mainFrame)
 CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
 CopyGamelive.Size = UDim2.new(0, 41, 0, 41)
 CopyGamelive.Position = UDim2.new(0.5, -227, 0.5, -220)
-CopyGamelive.Image = "http://www.roblox.com/asset/?id=73702068024714"
+CopyGamelive.Image = "http://www.roblox.com/asset/?id=122024633828045"
 CopyGamelive.BackgroundTransparency = 1
 CopyGamelive.ZIndex = 2
 
@@ -589,6 +656,11 @@ CopyGamelive.MouseButton1Click:Connect(function()
 	local currentServerId = game.JobId
 	local joinCommand = 'Roblox.GameLauncher.joinGameInstance(' .. game.PlaceId .. ', "' .. currentServerId .. '")'
 	setclipboard(joinCommand)
+
+	local gui = mainFrame:FindFirstAncestorOfClass("ScreenGui")
+	if gui then
+		showNotif(gui, getTranslatedText())
+	end
 end)
 
 
@@ -750,8 +822,8 @@ local function toggleGuiSize()
 		maxPlayersBtn.Position = UDim2.new(0.5, -264, 0.5, -220)
 
 		CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
-                CopyGamelive.Size = UDim2.new(0, 41, 0, 41)
-                CopyGamelive.Position = UDim2.new(0.5, -227, 0.5, -220)
+        CopyGamelive.Size = UDim2.new(0, 41, 0, 41)
+        CopyGamelive.Position = UDim2.new(0.5, -227, 0.5, -220)
 
 	else  
 		mainFrame.Size = UDim2.new(0, 549, 0, 390)
@@ -778,9 +850,9 @@ local function toggleGuiSize()
 		lowPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
 		lowPlayersBtn.Position = UDim2.new(0.5, -173, 0.5, -175)
 
-                CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
-                CopyGamelive.Size = UDim2.new(0, 25, 0, 25)
-                CopyGamelive.Position = UDim2.new(0.5, -199, 0.5, -175)
+        CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
+        CopyGamelive.Size = UDim2.new(0, 25, 0, 25)
+        CopyGamelive.Position = UDim2.new(0.5, -199, 0.5, -175)
 
 		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
 		resizeButton.Size = UDim2.new(0, 25, 0, 25)
@@ -833,7 +905,7 @@ end
 
 Modules.ChangeColor()
 Modules.print("Grey","-------------------------------------------------------------------------------------",20)
-Modules.print("Grey", "Script Server Finder Deluxe is executed !!! , Version 3.5",20)
+Modules.print("Grey", "Script Server Finder Deluxe is executed !!! , Version 3.6",20)
 Modules.print("Grey","-------------------------------------------------------------------------------------",20)
 Modules.print("Grey", "Si vous rencontrez des problèmes avec mon script aller m'écricre en privé sur Discord: maxproglitcher",20)
 Modules.print("Grey","-------------------------------------------------------------------------------------",20)
