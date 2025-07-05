@@ -850,9 +850,9 @@ local function toggleGuiSize()
 		lowPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
 		lowPlayersBtn.Position = UDim2.new(0.5, -173, 0.5, -175)
 
-        CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
-        CopyGamelive.Size = UDim2.new(0, 25, 0, 25)
-        CopyGamelive.Position = UDim2.new(0.5, -199, 0.5, -175)
+                CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
+                CopyGamelive.Size = UDim2.new(0, 25, 0, 25)
+                CopyGamelive.Position = UDim2.new(0.5, -199, 0.5, -175)
 
 		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
 		resizeButton.Size = UDim2.new(0, 25, 0, 25)
