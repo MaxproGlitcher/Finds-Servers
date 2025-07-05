@@ -1,4 +1,4 @@
-# Finds-Server Deluxe script 💻
+# Finds-Server Deluxe script 💻📱
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxproGlitcher/Finds-Servers/refs/heads/main/Finds%20Servers%20Code"))()
 ```
