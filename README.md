@@ -15,6 +15,4 @@ The script allows you to be able to change servers without the need to click on 
 # video Finds-Server Deluxe script 👀
 
 # Here is the overview 👀
-
-https://github.com/user-attachments/assets/b807f9f6-ec54-416b-affe-e6ff7bd66de8
-
+https://github.com/user-attachments/assets/d6984624-7dd5-4b80-bf64-5fde081497c9
