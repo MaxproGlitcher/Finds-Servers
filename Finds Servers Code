@@ -321,9 +321,9 @@ local function CreateServerFrame(server)
 	infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	infoLabel.Text = "Ping : " .. (server.ping or "N/A") .. "\nPlayers : " .. server.playing .. "/" .. server.maxPlayers
 
-    -- ID du Jeux 
+        -- ID du Jeux 
 
-    local placeIdLabel = Instance.new("TextLabel", serverFrame)
+        local placeIdLabel = Instance.new("TextLabel", serverFrame)
 	placeIdLabel.Size = UDim2.new(0, 300, 0, 20)
 	placeIdLabel.Position = UDim2.new(0, 10, 0, 76)
 	placeIdLabel.BackgroundTransparency = 1
@@ -836,8 +836,8 @@ local function toggleGuiSize()
 		maxPlayersBtn.Position = UDim2.new(0.5, -264, 0.5, -220)
 
 		CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
-        CopyGamelive.Size = UDim2.new(0, 41, 0, 41)
-        CopyGamelive.Position = UDim2.new(0.5, -227, 0.5, -220)
+                CopyGamelive.Size = UDim2.new(0, 41, 0, 41)
+                CopyGamelive.Position = UDim2.new(0.5, -227, 0.5, -220)
 
 	else  
 		mainFrame.Size = UDim2.new(0, 549, 0, 390)
@@ -864,9 +864,9 @@ local function toggleGuiSize()
 		lowPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
 		lowPlayersBtn.Position = UDim2.new(0.5, -173, 0.5, -175)
 
-        CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
-        CopyGamelive.Size = UDim2.new(0, 25, 0, 25)
-        CopyGamelive.Position = UDim2.new(0.5, -199, 0.5, -175)
+                CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
+                CopyGamelive.Size = UDim2.new(0, 25, 0, 25)
+                CopyGamelive.Position = UDim2.new(0.5, -199, 0.5, -175)
 
 		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
 		resizeButton.Size = UDim2.new(0, 25, 0, 25)
