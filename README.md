@@ -11,13 +11,12 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxproGlitcher/Finds-
 
 The script allows you to be able to change servers without the need to click on the x and restart the servers everything is done from the script, the script has a function to restart the same servers where you were and with the search for servers obtained in the public server database you would have an experience faster without preventing you from playing thanks to use the Finds-Server Deluxe script.
 
+# Image Finds-Servers Deluxe script 👀⬇️🛜🌐
+<img width="967" height="712" alt="Image" src="https://github.com/user-attachments/assets/3b4b8288-94f6-4dcd-9387-cab81941dd54" />
 
 
 # Option Custom 
 The Deluxe Servers also allow you to obtain links to the servers you are on or simply another proposed server and add it in your web browser console, making it easy if you want to send it to your friends or as an alternative account.
-
-# Image Finds-Servers Deluxe script 👀⬇️🛜🌐
-<img width="967" height="712" alt="Image" src="https://github.com/user-attachments/assets/3b4b8288-94f6-4dcd-9387-cab81941dd54" />
 
 # To join a servers, just click on join its very easy !!!🖱️⬇️
 <img width="965" height="709" alt="Image" src="https://github.com/user-attachments/assets/7d16b656-9d81-4605-b54a-134e1b545ab6" />
