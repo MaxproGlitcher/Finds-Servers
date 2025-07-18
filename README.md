@@ -8,6 +8,14 @@ The script allows you to be able to change servers without the need to click on 
 <h1 align="center">Hello Guys 👋🏻, I'm Server Finder Deluxe</h1>
 <h3 align="center">A passionate frontend developer from Canada</h3>
 
+
+
+<div align="center">
+  <img src="https://visitor-badge.laobi.icu/badge?page_id=MaxproGlitcher.MaxproGlitcher&"  />
+</div>
+
+
+
 <h3 align="left">Connect with me:</h3>
 <p align="left">
 <a href="https://dev.to/max" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/devto.svg" alt="max" height="30" width="40" /></a>
