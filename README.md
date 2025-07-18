@@ -1,3 +1,6 @@
+<h1 align="center">Hello Guys 👋🏻, Welcome too Server Finder Deluxe</h1>
+<h3 align="center"> Developer from Canada and .lua coding </h3>
+
 # Finds-Server Deluxe script 💻📱
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxproGlitcher/Finds-Servers/refs/heads/main/Finds%20Servers%20Code"))()
