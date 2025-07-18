@@ -15,7 +15,7 @@ The script allows you to be able to change servers without the need to click on 
 <img width="967" height="712" alt="Image" src="https://github.com/user-attachments/assets/3b4b8288-94f6-4dcd-9387-cab81941dd54" />
 
 
-# Option Custom 
+# Option Custom 🔧
 The Deluxe Servers also allow you to obtain links to the servers you are on or simply another proposed server and add it in your web browser console, making it easy if you want to send it to your friends or as an alternative account.
 
 # To join a servers, just click on join its very easy !!!🖱️⬇️
@@ -31,5 +31,5 @@ The Deluxe Servers also allow you to obtain links to the servers you are on or s
 
 # video Finds-Server Deluxe script 👀🎬
 
-# Here is the overview 👀
+# Here is the overview 👀🎬
 https://github.com/user-attachments/assets/d6984624-7dd5-4b80-bf64-5fde081497c9
