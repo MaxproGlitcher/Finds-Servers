@@ -1,4 +1,4 @@
-<h1 align="center">Hello Guys 👋🏻, Welcome too Server Finder Deluxe</h1>
+<h1 align="center">Hello Guys 👋🏻, Welcome too Server-Finder Deluxe</h1>
 <h3 align="center"> Developer from Canada and .lua coding </h3>
 <div align="center">
   <img src="https://visitor-badge.laobi.icu/badge?page_id=MaxproGlitcher.MaxproGlitcher&"  />
