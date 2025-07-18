@@ -6,7 +6,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxproGlitcher/Finds-
 The script allows you to be able to change servers without the need to click on the x and restart the servers everything is done from the script, the script has a function to restart the same servers where you were and with the search for servers obtained in the public server database you would have an experience faster without preventing you from playing thanks to use the Finds-Server Deluxe script.
 
 <h1 align="center">Hello Guys 👋🏻, I'm Server Finder Deluxe</h1>
-<h3 align="center">A passionate frontend developer from Canada</h3>
+<h3 align="center"> Developer from Canada and .lua coding </h3>
 
 
 
