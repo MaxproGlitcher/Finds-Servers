@@ -119,7 +119,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v3.7"
+versionLabel.Text = "v3.8"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -882,23 +882,25 @@ resizeButton.MouseButton1Click:Connect(toggleGuiSize)
 
 -- Notification pour me contacter au cas problème pour le Script Server Finder Deluxe
 -- Impression de texte personnalisé pour la console roblox
+-- Impression de Texte Traduits pour pluiseurs langues
 local Modules = {
-    Colors =  {
-        ["Grey"] = "254, 254, 254", -- color in rgb
-        ["Cyan"] = "33, 161, 163"
-    }
+	Colors = {
+		["Grey"] = "254, 254, 254",
+		["Cyan"] = "33, 161, 163"
+	}
 }
 
 Modules.ChangeColor = function() 
-    game:GetService("RunService").Heartbeat:Connect(function()
-    	if game:GetService("CoreGui"):FindFirstChild("DevConsoleMaster") then 
-	        for _, v in pairs(game:GetService("CoreGui"):FindFirstChild("DevConsoleMaster"):GetDescendants()) do 
-	            if v:IsA("TextLabel") then 
-	                v.RichText = true 
-	            end 
-	        end 
-	    end
-    end)
+	game:GetService("RunService").Heartbeat:Connect(function()
+		local console = game:GetService("CoreGui"):FindFirstChild("DevConsoleMaster")
+		if console then
+			for _, v in pairs(console:GetDescendants()) do
+				if v:IsA("TextLabel") then 
+					v.RichText = true 
+				end 
+			end
+		end
+	end)
 end
 
 Modules.print = function(color, text, size)
@@ -906,24 +908,85 @@ Modules.print = function(color, text, size)
 		warn("Color was not found!")
 		return 
 	end 
-	
-	
-    local Text = '<font color="rgb(' .. Modules.Colors[color] .. ')"'
-    if size then
-        Text = Text .. ' size="' .. tostring(size) .. '"'
-    end
-    Text = Text .. '>' .. tostring(text) .. '</font>'
-    print(Text)
+
+	local Text = '<font color="rgb(' .. Modules.Colors[color] .. ')"'
+	if size then
+		Text = Text .. ' size="' .. tostring(size) .. '"'
+	end
+	Text = Text .. '>' .. tostring(text) .. '</font>'
+	print(Text)
 end
 
+local version = "3.8"
+
+local translations = {
+	fr = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "Script Server Finder Deluxe lancé !!!",
+		contact = "Si vous avez un problème avec le script, contactez maxproglitcher sur Discord.",
+	},
+	en = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "Script Server Finder Deluxe is executed !!!",
+		contact = "If you have a problem with the script, contact maxproglitcher on Discord.",
+	},
+	es = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "¡Script Server Finder Deluxe ejecutado!",
+		contact = "Si tienes un problema con el script, contacta a maxproglitcher en Discord.",
+	},
+	de = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "Script Server Finder Deluxe wurde ausgeführt!",
+		contact = "Bei Problemen mit dem Skript kontaktiere maxproglitcher auf Discord.",
+	},
+	it = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "Script Server Finder Deluxe eseguito!",
+		contact = "Se hai problemi con lo script, contatta maxproglitcher su Discord.",
+	},
+	pt = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "Script Server Finder Deluxe executado!",
+		contact = "Se você tiver problemas com o script, contate maxproglitcher no Discord.",
+	},
+	ru = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "Скрипт Server Finder Deluxe запущен!",
+		contact = "Если у вас есть проблемы со скриптом, свяжитесь с maxproglitcher в Discord.",
+	},
+	zh = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "脚本 Server Finder Deluxe 已执行！",
+		contact = "如果您遇到脚本问题，请在 Discord 上联系 maxproglitcher。",
+	},
+	tr = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "Script Server Finder Deluxe çalıştırıldı!",
+		contact = "Script ile ilgili bir sorun yaşarsanız, Discord üzerinden maxproglitcher ile iletişime geçin.",
+	},
+	ja = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "スクリプト Server Finder Deluxe を実行しました！",
+		contact = "スクリプトに問題がある場合は、Discord で maxproglitcher に連絡してください。",
+	},
+	ar = {
+		line = "-------------------------------------------------------------------------------------",
+		executed = "تم تنفيذ سكربت Server Finder Deluxe!",
+		contact = "إذا واجهت مشكلة في السكربت، تواصل مع maxproglitcher على ديسكورد.",
+	}
+}
+
+-- Utilisation correcte de RobloxLocaleId côté client
+local langCode = game:GetService("LocalizationService").RobloxLocaleId:lower():match("^([a-z][a-z])") or "en"
+local msg = translations[langCode] or translations["en"]
 
 Modules.ChangeColor()
-Modules.print("Grey","-------------------------------------------------------------------------------------",20)
-Modules.print("Grey", "Script Server Finder Deluxe is executed !!! , Version 3.7",20)
-Modules.print("Grey","-------------------------------------------------------------------------------------",20)
-Modules.print("Grey", "Si vous rencontrez des problèmes avec mon script aller m'écricre en privé sur Discord: maxproglitcher",20)
-Modules.print("Grey","-------------------------------------------------------------------------------------",20)
-Modules.print("Grey", "If you have any problems with my script, please write to me privately on Discord: maxproglitcher",20)
-Modules.print("Grey","-------------------------------------------------------------------------------------",20)
+Modules.print("Grey", msg.line, 20)
+Modules.print("Grey", msg.executed, 20)
+Modules.print("Grey", "Version "..version, 20)
+Modules.print("Grey", msg.line, 20)
+Modules.print("Grey", msg.contact, 20)
+Modules.print("Grey", msg.line, 20)
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
