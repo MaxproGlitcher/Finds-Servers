@@ -12,21 +12,21 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxproGlitcher/Finds-
 The script allows you to be able to change servers without the need to click on the x and restart the servers everything is done from the script, the script has a function to restart the same servers where you were and with the search for servers obtained in the public server database you would have an experience faster without preventing you from playing thanks to use the Finds-Server Deluxe script.
 
 # Image Finds-Servers Deluxe script 👀⬇️🛜🌐
-<img width="968" height="712" alt="Image" src="https://github.com/user-attachments/assets/135e36b6-c78c-407a-9826-2d6e4042942d" />
+<img width="968" height="710" alt="Image" src="https://github.com/user-attachments/assets/188175b9-e365-4719-897d-8163a8ce34f9" />
 
 
 # Option Custom 🔧
 The Deluxe Servers also allow you to obtain links to the servers you are on or simply another proposed server and add it in your web browser console, making it easy if you want to send it to your friends or as an alternative account.
 
 # To join a servers, just click on join its very easy !!!🖱️⬇️
-<img width="968" height="712" alt="Image" src="https://github.com/user-attachments/assets/67321d04-ed2f-4868-8438-9309583499db" />>
+<img width="968" height="710" alt="Image" src="https://github.com/user-attachments/assets/369c6e8c-d66e-4435-b320-13963067679d" />
 
 # Option Custom Button for Get Servers link Game
 # Your Link for to add in the web browser console🖱️⬇️
-<img width="968" height="712" alt="Image" src="https://github.com/user-attachments/assets/e0cb72bc-968c-433f-951c-80d490e697a8" />
+<img width="968" height="710" alt="Image" src="https://github.com/user-attachments/assets/267ed2c7-0ee4-4e70-848d-eeea9dd0c43f" />
 
 # Link Servers for to add in the web browser console🖱️⬇️
-<img width="968" height="712" alt="Image" src="https://github.com/user-attachments/assets/ed45dcbd-32a6-466f-9c41-eece629d773a" />
+<img width="968" height="710" alt="Image" src="https://github.com/user-attachments/assets/48f92d6c-8020-47f5-8429-b46f318d8c8c" />
 
 
 # video Finds-Server Deluxe script 👀🎬
