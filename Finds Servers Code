@@ -89,6 +89,105 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+local LocalizationService = game:GetService("LocalizationService")
+local TweenService = game:GetService("TweenService")
+
+
+-- Sélection automatique HTTP request
+
+local requestFunc = nil
+if syn and syn.request then
+    requestFunc = syn.request
+elseif http and http.request then
+    requestFunc = http.request
+elseif http_request then
+    requestFunc = http_request
+elseif fluxus and fluxus.request then
+    requestFunc = fluxus.request
+elseif request then
+    requestFunc = request
+end
+
+
+-- Traductions
+
+local translations = {
+	["fr"] = "Aucune fonction HTTP supportée trouvée ! 😢",
+	["en"] = "No supported HTTP request function found! 😢",
+	["es"] = "¡No se encontró ninguna función HTTP compatible! 😢",
+	["pt"] = "Nenhuma função HTTP suportada encontrada! 😢",
+	["tr"] = "Desteklenen HTTP isteği işlevi bulunamadı! 😢",
+	["it"] = "Nessuna funzione HTTP supportata trovata! 😢",
+	["de"] = "Keine unterstützte HTTP-Anfragefunktion gefunden! 😢",
+	["ar"] = "لم يتم العثور على أي دالة HTTP مدعومة! 😢",
+	["ja"] = "サポートされているHTTPリクエスト機能が見つかりません！😢",
+	["ru"] = "Поддерживаемая функция HTTP-запроса не найдена! 😢",
+	["zh"] = "未找到受支持的HTTP请求函数！😢",
+}
+
+local function getTranslatedMessage()
+	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
+	return translations[langCode] or translations["en"]
+end
+
+
+-- Notification TweenService
+
+local function showError(message)
+	local screenGui = game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")
+	if not screenGui then return end
+
+	local notif = Instance.new("Frame")
+	notif.Size = UDim2.new(0, 350, 0, 60)
+	notif.Position = UDim2.new(1, 340, 1, -20)
+	notif.AnchorPoint = Vector2.new(1, 1)
+	notif.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+	notif.BorderSizePixel = 0
+	notif.ZIndex = 10
+	notif.Parent = screenGui
+
+	Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 10)
+
+	local stroke = Instance.new("UIStroke", notif)
+	stroke.Color = Color3.fromRGB(0, 0, 0)
+	stroke.Thickness = 1
+
+	local label = Instance.new("TextLabel", notif)
+	label.Size = UDim2.new(1, -30, 1, 0)
+	label.Position = UDim2.new(0, 15, 0, 0)
+	label.Text = message
+	label.TextColor3 = Color3.fromRGB(0, 0, 0)
+	label.BackgroundTransparency = 1
+	label.TextSize = 16
+	label.Font = Enum.Font.GothamMedium
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.ZIndex = 11
+
+	TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Position = UDim2.new(1, -20, 1, -20)
+	}):Play()
+
+	task.delay(3, function()
+		local tween = TweenService:Create(notif, TweenInfo.new(0.3), {
+			BackgroundTransparency = 1,
+			Position = UDim2.new(1, 340, 1, -20)
+		})
+		tween:Play()
+		tween.Completed:Wait()
+		notif:Destroy()
+	end)
+end
+
+
+-- Vérifie si fonction trouvée
+
+if not requestFunc then
+	showError(getTranslatedMessage())
+	return -- stoppe le script proprement
+end
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 local screenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.Size = UDim2.new(0, 650, 0, 500)
@@ -131,7 +230,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v3.9"
+versionLabel.Text = "v4.0"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -319,7 +418,7 @@ local function CreateServerFrame(server)
 	serverFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	serverFrame.BorderSizePixel = 0
 
-	-- Textlabel Pour le nombre de joueurs, ping du servers , FPS du servers et le nombre Maximal du servers public.
+	-- Textlabel Pour le nombre de joueurs, ping du servers , et le nombre Maximal du servers public.
 
 	local infoLabel = Instance.new("TextLabel", serverFrame)
 	infoLabel.Size = UDim2.new(0, 300, 0, 60)
@@ -332,9 +431,9 @@ local function CreateServerFrame(server)
 	infoLabel.TextSize = 16
 	infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	local fps = math.floor(1000 / (server.ping or 1))
-        infoLabel.Text = "Ping : " .. (server.ping or "N/A") ..
-                         "\nFPS : " .. fps ..
-                         "\nPlayers : " .. server.playing .. "/" .. server.maxPlayers
+    infoLabel.Text = "Ping : " .. (server.ping or "N/A") ..
+                 "\nFPS : " .. fps ..
+                 "\nPlayers : " .. server.playing .. "/" .. server.maxPlayers
 
         -- ID du Jeux 
 
@@ -401,8 +500,36 @@ end
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Global Servers
-
 local allServers = {}
+local fpsCheckInterval = 1
+local minFPS = 21
+local maxPing = 350 -- au-dessus de ça on passe en mode fluide
+local smoothMode = false
+
+-- FPS Calculateurs
+local RunService = game:GetService("RunService")
+local lastTime = tick()
+local frames = 0
+
+RunService.RenderStepped:Connect(function()
+	frames += 1
+	if tick() - lastTime >= fpsCheckInterval then
+		local fps = frames / (tick() - lastTime)
+		smoothMode = fps < minFPS -- si FPS trop bas, mode fluide
+		frames = 0
+		lastTime = tick()
+	end
+end)
+
+-- Vérifie si un serveur a un ping trop élevé
+local function hasHighPing(servers)
+	for _, server in ipairs(servers) do
+		if (server.ping or 0) > maxPing then
+			return true
+		end
+	end
+	return false
+end
 
 function updateServerList(servers)
 	for _, v in pairs(serverFrames) do
@@ -411,9 +538,20 @@ function updateServerList(servers)
 	posChange = 8
 	table.clear(serverFrames)
 
-	for _, server in ipairs(servers) do
-		CreateServerFrame(server)
-		posChange += 154
+	-- si FPS bas OU pings trop élevés
+	if smoothMode or hasHighPing(servers) then
+		task.spawn(function()
+			for _, server in ipairs(servers) do
+				CreateServerFrame(server)
+				posChange += 154
+				task.wait(0.05)
+			end
+		end)
+	else
+		for _, server in ipairs(servers) do
+			CreateServerFrame(server)
+			posChange += 154
+		end
 	end
 end
 
@@ -425,7 +563,6 @@ function refreshServers()
 	end
 end
 
-
 refreshServers()
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -434,6 +571,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		screenGui:Destroy()
 	end
 end)
+
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -894,6 +1032,80 @@ end
 resizeButton.MouseButton1Click:Connect(toggleGuiSize)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Services MODE PERFORMANCE BOOST 
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+
+-- MODE PERFORMANCE BOOST 
+local UserSettings = settings():GetService("RenderSettings")
+local originalSettings = {
+    QualityLevel = UserSettings.QualityLevel,
+    EditQualityLevel = UserSettings.EditQualityLevel
+}
+
+local function EnablePerformanceBoost()
+    UserSettings.QualityLevel = Enum.QualityLevel.Level01
+    UserSettings.EditQualityLevel = Enum.QualityLevel.Level01
+    if game:GetService("Lighting"):FindFirstChildOfClass("PostEffect") then
+        for _, effect in pairs(game:GetService("Lighting"):GetChildren()) do
+            if effect:IsA("PostEffect") then
+                effect.Enabled = false
+            end
+        end
+    end
+    workspace.GlobalShadows = false
+end
+
+local function DisablePerformanceBoost()
+    UserSettings.QualityLevel = originalSettings.QualityLevel
+    UserSettings.EditQualityLevel = originalSettings.EditQualityLevel
+    for _, effect in pairs(game:GetService("Lighting"):GetChildren()) do
+        if effect:IsA("PostEffect") then
+            effect.Enabled = true
+        end
+    end
+    workspace.GlobalShadows = true
+end
+
+local success, err = pcall(function()
+    -- Exemple pour modifier GlobalShadows
+    if workspace:FindFirstChild("GlobalShadows") then
+        workspace.GlobalShadows.Enabled = false
+    else
+        print("No ‘GlobalShadows’ objects found to be modified.")
+    end
+
+    -- Exemple pour modifier WallShadows
+    if workspace:FindFirstChild("WallShadows") then
+        workspace.WallShadows.Enabled = false
+    else
+        print("No ‘WallShadows’ objects found to be modified.")
+    end
+end)
+
+if not success then
+    warn("An unexpected error has occurred. No ‘GlobalShadows’ object found to be modified. : ", err)
+end
+
+
+
+
+-- Création de ton GUI
+local screenGui = Instance.new("ScreenGui")
+-- ...
+
+-- Quand tu ouvres le GUI
+EnablePerformanceBoost()
+
+-- Quand tu fermes le GUI
+CloseButton.MouseButton1Click:Connect(function()
+    DisablePerformanceBoost()
+    screenGui.Enabled = false
+end)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Notification pour me contacter au cas problème pour le Script Server Finder Deluxe
 -- Impression de texte personnalisé pour la console roblox
@@ -932,7 +1144,7 @@ Modules.print = function(color, text, size)
 	print(Text)
 end
 
-local version = "3.9"
+local version = "4.0"
 
 local translations = {
 	fr = {
