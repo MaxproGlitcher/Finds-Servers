@@ -94,7 +94,7 @@ local LocalizationService = game:GetService("LocalizationService")
 local TweenService = game:GetService("TweenService")
 
 
--- Sélection automatique HTTP request
+-- ( Si exploit n'a pas la fonction http le script n'ext pas utilisable )
 
 local requestFunc = nil
 if syn and syn.request then
@@ -374,6 +374,7 @@ scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scrollFrame.ScrollBarThickness = 6
 scrollFrame.BackgroundTransparency = 1
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 local layout = Instance.new("UIListLayout", scrollFrame)
 layout.Padding = UDim.new(0, 10)
 
@@ -1032,7 +1033,9 @@ end
 resizeButton.MouseButton1Click:Connect(toggleGuiSize)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 -- Services MODE PERFORMANCE BOOST 
+
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
