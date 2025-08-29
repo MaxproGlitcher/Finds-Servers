@@ -13,7 +13,7 @@ The script allows you to be able to change servers without the need to click on 
 
 # Image Finds-Servers Deluxe script 👀⬇️🛜🌐
 
-https://github.com/MaxproGlitcher/Finds-Servers/blob/8a086fd827a8809817702a753fbdc0c77621c01f/Server%20Finder%20Deluxe%20Screen%20Shot.png
+<img width="968" height="710" alt="Image" src="https://github.com/user-attachments/assets/a23a1c5e-ccd0-4a7f-a1b7-2893656ed99b" />
 
 
 # Option Custom 🔧
