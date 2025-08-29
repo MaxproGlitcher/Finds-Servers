@@ -4,6 +4,8 @@
   <img src="https://visitor-badge.laobi.icu/badge?page_id=MaxproGlitcher.MaxproGlitcher&"  />
 </div>
 
+![image alt](https://github.com/MaxproGlitcher/Finds-Servers/blob/main/Server%20Finder%20Deluxe%20Screen%20Shot.png?raw=true)
+
 # Script Finds-Server Deluxe 💻📱
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxproGlitcher/Finds-Servers/refs/heads/main/Finds%20Servers%20Code"))()
