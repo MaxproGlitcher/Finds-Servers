@@ -94,7 +94,7 @@ local LocalizationService = game:GetService("LocalizationService")
 local TweenService = game:GetService("TweenService")
 
 
--- ( Si l'exploit n'a pas la fonction http le script ne seras pas utilisable )
+-- ( Si exploit n'a pas la fonction http le script n'ext pas utilisable )
 
 local requestFunc = nil
 if syn and syn.request then
@@ -230,7 +230,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v4.0"
+versionLabel.Text = "v4.1"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -524,6 +524,7 @@ end)
 
 -- Vérifie si un serveur a un ping trop élevé
 local function hasHighPing(servers)
+	if typeof(servers) ~= "table" then return false end
 	for _, server in ipairs(servers) do
 		if (server.ping or 0) > maxPing then
 			return true
@@ -533,6 +534,9 @@ local function hasHighPing(servers)
 end
 
 function updateServerList(servers)
+	-- sécurité
+	if typeof(servers) ~= "table" then return end
+
 	for _, v in pairs(serverFrames) do
 		v:Destroy()
 	end
@@ -558,11 +562,17 @@ end
 
 function refreshServers()
 	local servers = GetAllServers(game.PlaceId)
-	if servers and not (servers == {}) then
-		allServers = servers[1]
+
+	-- sécurité : vérifie que servers est bien une table et contient quelque chose
+	if typeof(servers) == "table" and #servers > 0 then
+		allServers = servers[1] or {}
 		updateServerList(allServers)
+	else
+		warn("No server found or API error")
 	end
 end
+
+
 
 refreshServers()
 
@@ -700,21 +710,26 @@ end)
 -- Le button Low Players et Max Players
 
 local function sortServers(servers, currentSort)
-	if currentSort == "fastest" then
+	if typeof(servers) ~= "table" then return {} end
+
+	if currentSort == "lowPlayers" then
 		table.sort(servers, function(a, b)
-			return (a.ping or 9999) < (b.ping or 9999)
-		end)
-	elseif currentSort == "lowPlayers" then
-		table.sort(servers, function(a, b)
-			return a.playing < b.playing
+			return (a.playing or 0) < (b.playing or 0)
 		end)
 	elseif currentSort == "maxPlayers" then
 		table.sort(servers, function(a, b)
-			return a.playing > b.playing
+			return (a.playing or 0) > (b.playing or 0)
+		end)
+	elseif currentSort == "fastest" then
+		table.sort(servers, function(a, b)
+			return (a.ping or 9999) < (b.ping or 9999)
 		end)
 	end
+
 	return servers
 end
+
+
 
 local lowPlayersBtn = Instance.new("ImageButton", mainFrame)
 lowPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1036,77 +1051,57 @@ resizeButton.MouseButton1Click:Connect(toggleGuiSize)
 
 -- Services MODE PERFORMANCE BOOST 
 
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
+-- Services
 local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
 
-
--- MODE PERFORMANCE BOOST 
+-- Sauvegarde des réglages d'origine
 local UserSettings = settings():GetService("RenderSettings")
 local originalSettings = {
     QualityLevel = UserSettings.QualityLevel,
-    EditQualityLevel = UserSettings.EditQualityLevel
+    EditQualityLevel = UserSettings.EditQualityLevel,
+    GlobalShadows = Lighting.GlobalShadows
 }
 
+-- Active le mode performance boost
 local function EnablePerformanceBoost()
     UserSettings.QualityLevel = Enum.QualityLevel.Level01
     UserSettings.EditQualityLevel = Enum.QualityLevel.Level01
-    if game:GetService("Lighting"):FindFirstChildOfClass("PostEffect") then
-        for _, effect in pairs(game:GetService("Lighting"):GetChildren()) do
-            if effect:IsA("PostEffect") then
-                effect.Enabled = false
-            end
+
+    -- Désactive tous les effets visuels post-traitement
+    for _, effect in pairs(Lighting:GetChildren()) do
+        if effect:IsA("PostEffect") then
+            effect.Enabled = false
         end
     end
-    workspace.GlobalShadows = false
+
+    -- Désactive les ombres globales
+    Lighting.GlobalShadows = false
 end
 
+-- Restaure les réglages normaux
 local function DisablePerformanceBoost()
     UserSettings.QualityLevel = originalSettings.QualityLevel
     UserSettings.EditQualityLevel = originalSettings.EditQualityLevel
-    for _, effect in pairs(game:GetService("Lighting"):GetChildren()) do
+
+    for _, effect in pairs(Lighting:GetChildren()) do
         if effect:IsA("PostEffect") then
             effect.Enabled = true
         end
     end
-    workspace.GlobalShadows = true
+
+    Lighting.GlobalShadows = originalSettings.GlobalShadows
 end
 
-local success, err = pcall(function()
-    -- Exemple pour modifier GlobalShadows
-    if workspace:FindFirstChild("GlobalShadows") then
-        workspace.GlobalShadows.Enabled = false
-    else
-        print("No ‘GlobalShadows’ objects found to be modified.")
-    end
-
-    -- Exemple pour modifier WallShadows
-    if workspace:FindFirstChild("WallShadows") then
-        workspace.WallShadows.Enabled = false
-    else
-        print("No ‘WallShadows’ objects found to be modified.")
-    end
-end)
-
-if not success then
-    warn("An unexpected error has occurred. No ‘GlobalShadows’ object found to be modified. : ", err)
-end
-
-
-
-
--- Création de ton GUI
-local screenGui = Instance.new("ScreenGui")
--- ...
-
--- Quand tu ouvres le GUI
+-- Exemple : activer au lancement
 EnablePerformanceBoost()
 
--- Quand tu fermes le GUI
-CloseButton.MouseButton1Click:Connect(function()
+-- Exemple : désactiver quand tu fermes le GUI
+closeBtn.MouseButton1Click:Connect(function()
     DisablePerformanceBoost()
     screenGui.Enabled = false
 end)
+
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1147,7 +1142,7 @@ Modules.print = function(color, text, size)
 	print(Text)
 end
 
-local version = "4.0"
+local version = "4.1"
 
 local translations = {
 	fr = {
@@ -1219,4 +1214,4 @@ Modules.print("Grey", msg.line, 20)
 Modules.print("Grey", msg.contact, 20)
 Modules.print("Grey", msg.line, 20)
 
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
