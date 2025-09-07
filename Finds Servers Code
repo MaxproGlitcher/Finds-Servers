@@ -134,7 +134,7 @@ end
 
 -- Notification TweenService
 
-local function showError(message)
+local function Httpincorrect(message)
 	local screenGui = game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")
 	if not screenGui then return end
 
@@ -183,7 +183,7 @@ end
 -- Vérifie si fonction trouvée
 
 if not requestFunc then
-	showError(getTranslatedMessage())
+	Httpincorrect(getTranslatedMessage())
 	return -- stoppe le script proprement
 end
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -569,6 +569,7 @@ function refreshServers()
 		updateServerList(allServers)
 	else
 		warn("No server found or API error")
+		showErrorTween()
 	end
 end
 
@@ -588,7 +589,7 @@ end)
 
 -- Fonction de notification d'erreur
 
-local function showError(message)
+local function showErrorTween(message)
 	local notif = Instance.new("TextLabel", screenGui)
 	notif.Size = UDim2.new(0, 300, 0, 40)
 	notif.Position = UDim2.new(1, -310, 1, -50)
@@ -646,7 +647,7 @@ local function getTranslatedMessage()
 end
 
 -- Notification moderne traduite
-local function showError()
+local function showErrorTween()
 	local message = getTranslatedMessage()
 	local screenGui = mainFrame:FindFirstAncestorOfClass("ScreenGui")
 	if not screenGui then return end
@@ -702,7 +703,7 @@ refreshBtn.MouseButton1Click:Connect(function()
 
 	local success, err = pcall(refreshServers)
 	if not success then
-		showError()
+		showErrorTween()
 	end
 end)
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1214,4 +1215,4 @@ Modules.print("Grey", msg.line, 20)
 Modules.print("Grey", msg.contact, 20)
 Modules.print("Grey", msg.line, 20)
 
-----------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
