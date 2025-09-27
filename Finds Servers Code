@@ -1,6 +1,6 @@
 --[[By MaxproGlitcher Discord:maxproglitcher
 
---Site Web official: https://github.com/MaxproGlitcher/Finds-Servers
+-- Site Web official: https://github.com/MaxproGlitcher/Finds-Servers
    
    _____                                       ________.__  .__  __         .__                  
   /     \ _____  ___  ________________  ____  /  _____/|  | |__|/  |_  ____ |  |__   ___________ 
@@ -76,7 +76,21 @@ gui:Destroy()
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, game:GetService("UserInputService"):GetPlatform())
+-- Compatibilité getgenv
+
+if game:GetService("CoreGui"):FindFirstChild("incognito") then
+    oldstring = loadstring
+    getfenv().loadstring = function(code)
+        local source = code
+        source = source:gsub("(%a+)%s*([%+%-%*/])=%s*", "%1 = %1 %2 ")
+        return oldstring(source)
+    end
+end
+if not getgenv then
+    getfenv().getgenv = function(layer)
+        return getfenv(layer)
+    end
+end
 
 getgenv().NextServer = nil
 getgenv().HasScannedAll = false
@@ -89,6 +103,11 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
+local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, game:GetService("UserInputService"):GetPlatform())
+VREnabled = game:GetService("VRService").VREnabled
+
+queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 local LocalizationService = game:GetService("LocalizationService")
 local TweenService = game:GetService("TweenService")
@@ -230,7 +249,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v4.1"
+versionLabel.Text = "v4.2"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -1143,7 +1162,7 @@ Modules.print = function(color, text, size)
 	print(Text)
 end
 
-local version = "4.1"
+local version = "4.2"
 
 local translations = {
 	fr = {
