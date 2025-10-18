@@ -208,6 +208,23 @@ end
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 local screenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+
+-- Essayer de créer un parent vers un emplacement protégé
+pcall(function()
+    if gethui then
+        screenGui.Parent = gethui()
+    elseif syn and syn.protect_gui then
+        syn.protect_gui(screenGui)
+        screenGui.Parent = game:GetService("CoreGui")
+    else
+        screenGui.Parent = game:GetService("CoreGui")
+    end
+end)
+
+if not screenGui.Parent then
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+end
+
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.Size = UDim2.new(0, 650, 0, 500)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -249,7 +266,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v4.2"
+versionLabel.Text = "v4.3"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -1162,7 +1179,7 @@ Modules.print = function(color, text, size)
 	print(Text)
 end
 
-local version = "4.2"
+local version = "4.3"
 
 local translations = {
 	fr = {
@@ -1235,3 +1252,4 @@ Modules.print("Grey", msg.contact, 20)
 Modules.print("Grey", msg.line, 20)
 
 --------------------------------------------------------------------------------------------------------------
+
