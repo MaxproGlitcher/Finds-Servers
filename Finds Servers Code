@@ -151,59 +151,115 @@ local function getTranslatedMessage()
 end
 
 
--- Notification TweenService
+--  Librairie Notification intégrée
+local NotificationLib = {
+    _notifications = {},
+    _theme = {
+        primaryColor = Color3.fromRGB(30,30,30),
+        textColor = Color3.fromRGB(255,255,255),
+        font = Enum.Font.GothamSemibold,
+        cornerRadius = UDim.new(0,8)
+    },
+    _settings = {
+        duration = 4,
+        spacing = 12,
+        fadeTime = 0.28,
+        slideDistance = 18
+    },
+    _icons = { info = "rbxassetid://9405926389" }
+}
 
-local function Httpincorrect(message)
-	local screenGui = game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")
-	if not screenGui then return end
-
-	local notif = Instance.new("Frame")
-	notif.Size = UDim2.new(0, 350, 0, 60)
-	notif.Position = UDim2.new(1, 340, 1, -20)
-	notif.AnchorPoint = Vector2.new(1, 1)
-	notif.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-	notif.BorderSizePixel = 0
-	notif.ZIndex = 10
-	notif.Parent = screenGui
-
-	Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 10)
-
-	local stroke = Instance.new("UIStroke", notif)
-	stroke.Color = Color3.fromRGB(0, 0, 0)
-	stroke.Thickness = 1
-
-	local label = Instance.new("TextLabel", notif)
-	label.Size = UDim2.new(1, -30, 1, 0)
-	label.Position = UDim2.new(0, 15, 0, 0)
-	label.Text = message
-	label.TextColor3 = Color3.fromRGB(0, 0, 0)
-	label.BackgroundTransparency = 1
-	label.TextSize = 16
-	label.Font = Enum.Font.GothamMedium
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 11
-
-	TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-		Position = UDim2.new(1, -20, 1, -20)
-	}):Play()
-
-	task.delay(3, function()
-		local tween = TweenService:Create(notif, TweenInfo.new(0.3), {
-			BackgroundTransparency = 1,
-			Position = UDim2.new(1, 340, 1, -20)
-		})
-		tween:Play()
-		tween.Completed:Wait()
-		notif:Destroy()
-	end)
+function NotificationLib:_init()
+    if not self._container then
+        self._container = Instance.new("ScreenGui")
+        self._container.Name = "NotificationLibrary"
+        self._container.ResetOnSpawn = false
+        self._container.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        self._container.Parent = game:GetService("CoreGui")
+    end
 end
 
+function NotificationLib:_calculatePosition(index)
+    local spacing = self._settings.spacing
+    local height = 90
+    return UDim2.new(1, -24, 1, -24 - (index-1)*(height+spacing))
+end
 
--- Vérifie si fonction trouvée
+function NotificationLib:_animateOut(frame, callback)
+    local tween = TweenService:Create(frame, TweenInfo.new(self._settings.fadeTime, Enum.EasingStyle.Quad), {
+        Position = frame.Position + UDim2.new(0,0,0,self._settings.slideDistance),
+        BackgroundTransparency = 1
+    })
+    tween:Play()
+    tween.Completed:Connect(function()
+        if frame and frame.Parent then frame:Destroy() end
+        if callback then callback() end
+    end)
+end
 
+function NotificationLib:Notify(opt)
+    self:_init()
+    opt = opt or {}
+    local title = opt.Title or "Notification"
+    local message = opt.Message or ""
+    local duration = opt.Duration or self._settings.duration
+
+    local frame = Instance.new("Frame")
+    frame.BackgroundColor3 = self._theme.primaryColor
+    frame.Size = UDim2.new(0,340,0,90)
+    frame.AnchorPoint = Vector2.new(1,1)
+    frame.Position = self:_calculatePosition(#self._notifications+1)
+    frame.Parent = self._container
+    Instance.new("UICorner", frame).CornerRadius = self._theme.cornerRadius
+
+    local icon = Instance.new("ImageLabel", frame)
+    icon.Image = self._icons.info
+    icon.Size = UDim2.new(0,28,0,28)
+    icon.Position = UDim2.new(0,12,0,12)
+    icon.BackgroundTransparency = 1
+
+    local titleLabel = Instance.new("TextLabel", frame)
+    titleLabel.Font = self._theme.font
+    titleLabel.TextColor3 = self._theme.textColor
+    titleLabel.TextSize = 16
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Text = title
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Size = UDim2.new(1,-60,0,22)
+    titleLabel.Position = UDim2.new(0,48,0,10)
+
+    local msgLabel = Instance.new("TextLabel", frame)
+    msgLabel.Font = Enum.Font.Gotham
+    msgLabel.TextColor3 = self._theme.textColor
+    msgLabel.TextSize = 14
+    msgLabel.TextWrapped = true
+    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+    msgLabel.Text = message
+    msgLabel.BackgroundTransparency = 1
+    msgLabel.Size = UDim2.new(1,-60,0,48)
+    msgLabel.Position = UDim2.new(0,48,0,30)
+
+    table.insert(self._notifications, frame)
+
+    task.delay(duration, function()
+        if frame and frame.Parent then
+            self:_animateOut(frame,function()
+                for i,v in ipairs(self._notifications) do
+                    if v==frame then table.remove(self._notifications,i); break end
+                end
+            end)
+        end
+    end)
+end
+
+-- Si aucune fonction HTTP trouvée : affiche notif et stop
 if not requestFunc then
-	Httpincorrect(getTranslatedMessage())
-	return -- stoppe le script proprement
+    NotificationLib:Notify({
+        Title = "HTTP",
+        Message = getTranslatedMessage(),
+        Duration = 5
+    })
+    return
 end
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -266,7 +322,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v4.3"
+versionLabel.Text = "v4.4"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -625,43 +681,11 @@ end)
 
 -- Fonction de notification d'erreur
 
-local function showErrorTween(message)
-	local notif = Instance.new("TextLabel", screenGui)
-	notif.Size = UDim2.new(0, 300, 0, 40)
-	notif.Position = UDim2.new(1, -310, 1, -50)
-	notif.AnchorPoint = Vector2.new(0, 1)
-	notif.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-	notif.Text = message
-	notif.TextColor3 = Color3.new(1,1,1)
-	notif.Font = Enum.Font.Ubuntu
-	notif.TextSize = 16
-	notif.BackgroundTransparency = 0.2
-	notif.TextXAlignment = Enum.TextXAlignment.Left
-	notif.TextYAlignment = Enum.TextYAlignment.Center
-
-	Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 8)
-
-	task.delay(4, function()
-		if notif then
-			notif:Destroy()
-		end
-	end)
-end
-
-local LocalizationService = game:GetService("LocalizationService")
 local TweenService = game:GetService("TweenService")
+local LocalizationService = game:GetService("LocalizationService")
 
--- Bouton Refresh avec gestion d'erreur
-local refreshBtn = Instance.new("ImageButton", mainFrame)
-refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-refreshBtn.Size = UDim2.new(0, 47, 0, 47)
-refreshBtn.Position = UDim2.new(0.5, 250, 0.5, -220)
-refreshBtn.Image = "http://www.roblox.com/asset/?id=126446661859683"
-refreshBtn.BackgroundTransparency = 1
-refreshBtn.ZIndex = 2
-
--- Traductions du message d'erreur
-local translations = {
+-- Traductions
+local langText = {
 	["fr"] = "Erreur de chargement. Réessaie.",
 	["en"] = "Error loading. Please try again.",
 	["es"] = "Error al cargar. Inténtalo de nuevo.",
@@ -671,77 +695,142 @@ local translations = {
 	["de"] = "Fehler beim Laden. Bitte versuche es erneut.",
 	["ar"] = "حدث خطأ أثناء التحميل. الرجاء المحاولة مرة أخرى.",
 	["ja"] = "読み込みエラーが発生しました。もう一度お試しください。",
-	["tr"] = "Sunucuya yeniden bağlanılıyor...",
 	["ru"] = "Ошибка загрузки. Пожалуйста, попробуйте еще раз.",
-	["zh"] = "加载错误。请重试。",
+	["zh"] = "加载错误。请重试。"
 }
 
-
 local function getTranslatedMessage()
-	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
-	return translations[langCode] or translations["en"]
+	local langCode = (LocalizationService.RobloxLocaleId or "en"):sub(1,2)
+	return langText[langCode] or langText["en"]
 end
 
--- Notification moderne traduite
-local function showErrorTween()
-	local message = getTranslatedMessage()
-	local screenGui = mainFrame:FindFirstAncestorOfClass("ScreenGui")
-	if not screenGui then return end
+-- Librairie Notification intégrée
+local NotificationLib = {
+    _notifications = {},
+    _theme = {
+        primaryColor = Color3.fromRGB(30, 30, 30),
+        textColor = Color3.fromRGB(255, 255, 255),
+        font = Enum.Font.GothamSemibold,
+        cornerRadius = UDim.new(0, 8)
+    },
+    _settings = {
+        duration = 4,
+        spacing = 12,
+        fadeTime = 0.28,
+        slideDistance = 18
+    },
+    _icons = { info = "rbxassetid://9405926389" }
+}
 
-	local notif = Instance.new("Frame")
-	notif.Size = UDim2.new(0, 320, 0, 60)
-	notif.Position = UDim2.new(1, 340, 1, -20)
-	notif.AnchorPoint = Vector2.new(1, 1)
-	notif.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-	notif.BorderSizePixel = 0
-	notif.ZIndex = 10
-	notif.Parent = screenGui
+function NotificationLib:_init()
+	if not self._container then
+		self._container = Instance.new("ScreenGui")
+		self._container.Name = "NotificationLibrary"
+		self._container.ResetOnSpawn = false
+		self._container.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		self._container.Parent = game:GetService("CoreGui")
+	end
+end
 
-	Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 10)
+function NotificationLib:_calculatePosition(index)
+	local spacing = self._settings.spacing
+	local height = 90
+	return UDim2.new(1, -24, 1, -24 - (index-1)*(height+spacing))
+end
 
-	local stroke = Instance.new("UIStroke", notif)
-	stroke.Color = Color3.fromRGB(0, 0, 0)
-	stroke.Thickness = 1
-
-	local label = Instance.new("TextLabel", notif)
-	label.Size = UDim2.new(1, -30, 1, 0)
-	label.Position = UDim2.new(0, 15, 0, 0)
-	label.Text = message
-	label.TextColor3 = Color3.fromRGB(0, 0, 0)
-	label.BackgroundTransparency = 1
-	label.TextSize = 16
-	label.Font = Enum.Font.GothamMedium
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 11
-	label.Parent = notif
-
-	TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-		Position = UDim2.new(1, -20, 1, -20)
-	}):Play()
-
-	task.delay(3, function()
-		local tween = TweenService:Create(notif, TweenInfo.new(0.3), {
-			BackgroundTransparency = 1,
-			Position = UDim2.new(1, 340, 1, -20)
-		})
-		tween:Play()
-		tween.Completed:Wait()
-		notif:Destroy()
+function NotificationLib:_animateOut(frame, callback)
+	local tween = TweenService:Create(frame, TweenInfo.new(self._settings.fadeTime, Enum.EasingStyle.Quad), {
+		Position = frame.Position + UDim2.new(0,0,0,self._settings.slideDistance),
+		BackgroundTransparency = 1
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		if frame and frame.Parent then frame:Destroy() end
+		if callback then callback() end
 	end)
 end
 
-refreshBtn.MouseButton1Click:Connect(function()
-	for _, v in pairs(serverFrames) do
-		v:Destroy()
-	end
-	posChange = 8
-	table.clear(serverFrames)
+function NotificationLib:Notify(opt)
+	self:_init()
+	opt = opt or {}
+	local title = opt.Title or "Notification"
+	local message = opt.Message or ""
+	local duration = opt.Duration or self._settings.duration
 
-	local success, err = pcall(refreshServers)
-	if not success then
-		showErrorTween()
-	end
-end)
+	local frame = Instance.new("Frame")
+	frame.BackgroundColor3 = self._theme.primaryColor
+	frame.Size = UDim2.new(0, 340, 0, 90)
+	frame.AnchorPoint = Vector2.new(1,1)
+	frame.Position = self:_calculatePosition(#self._notifications + 1)
+	frame.Parent = self._container
+	Instance.new("UICorner", frame).CornerRadius = self._theme.cornerRadius
+
+	local icon = Instance.new("ImageLabel", frame)
+	icon.Image = self._icons.info
+	icon.Size = UDim2.new(0,28,0,28)
+	icon.Position = UDim2.new(0,12,0,12)
+	icon.BackgroundTransparency = 1
+
+	local titleLabel = Instance.new("TextLabel", frame)
+	titleLabel.Font = self._theme.font
+	titleLabel.TextColor3 = self._theme.textColor
+	titleLabel.TextSize = 16
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.Text = title
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Size = UDim2.new(1,-60,0,22)
+	titleLabel.Position = UDim2.new(0,48,0,10)
+
+	local msgLabel = Instance.new("TextLabel", frame)
+	msgLabel.Font = Enum.Font.Gotham
+	msgLabel.TextColor3 = self._theme.textColor
+	msgLabel.TextSize = 14
+	msgLabel.TextWrapped = true
+	msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+	msgLabel.Text = message
+	msgLabel.BackgroundTransparency = 1
+	msgLabel.Size = UDim2.new(1,-60,0,48)
+	msgLabel.Position = UDim2.new(0,48,0,30)
+
+	table.insert(self._notifications, frame)
+
+	task.delay(duration, function()
+		if frame and frame.Parent then
+			self:_animateOut(frame, function()
+				for i,v in ipairs(self._notifications) do
+					if v == frame then table.remove(self._notifications,i); break end
+				end
+			end)
+		end
+	end)
+end
+
+-- Bouton Refresh 
+local function CreateRefreshButton(mainFrame)
+	local refreshBtn = Instance.new("ImageButton")
+	refreshBtn.Parent = mainFrame
+	refreshBtn.AnchorPoint = Vector2.new(0.5,0.5)
+	refreshBtn.Size = UDim2.new(0,47,0,47)
+	refreshBtn.Position = UDim2.new(0.5,250,0.5,-220)
+	refreshBtn.Image = "http://www.roblox.com/asset/?id=126446661859683"
+	refreshBtn.BackgroundTransparency = 1
+	refreshBtn.ZIndex = 10
+
+	refreshBtn.MouseButton1Click:Connect(function()
+		local success, err = pcall(refreshServers)
+		if not success then
+			NotificationLib:Notify({
+				Title = "Error",
+				Message = getTranslatedMessage(),
+				Duration = 4
+			})
+		end
+	end)
+end
+
+-- Appel refresh Button
+CreateRefreshButton(mainFrame)
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Le button Low Players et Max Players
@@ -795,92 +884,153 @@ maxPlayersBtn.MouseButton1Click:Connect(function()
 end)
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
---Buttons pour copy le server public ou nous somme live!!!
+-- Buttons pour copy le server public ou nous somme live!!!
 
 local TweenService = game:GetService("TweenService")
 local LocalizationService = game:GetService("LocalizationService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
+-- Traductions
 local langText = {
-	["fr"] = "L'ID du serveur a été copié avec succès !",
-	["en"] = "Server ID copied successfully!",
-	["es"] = "¡ID del servidor copiado correctamente!",
-	["de"] = "Server-ID erfolgreich kopiert!",
-	["it"] = "ID del server copiato con successo!",
-	["pt"] = "ID do servidor copiado com sucesso!",
-	["ru"] = "ID сервера успешно скопирован!",
-	["zh"] = "服务器ID复制成功！",
-	["tr"] = "Sunucu kimliği başarıyla kopyalandı!",
-	["ja"] = "サーバーIDが正常にコピーされました！",
-	["ar"] = "تم نسخ معرف الخادم بنجاح!",
+    ["fr"] = "L'ID du serveur a été copié avec succès !",
+    ["en"] = "Server ID copied successfully!",
+    ["es"] = "¡ID del servidor copiado correctamente!",
+    ["de"] = "Server-ID erfolgreich kopiert!",
+    ["it"] = "ID del server copiato con successo!",
+    ["pt"] = "ID do servidor copiado com sucesso!",
+    ["ru"] = "ID сервера успешно скопирован!",
+    ["zh"] = "服务器ID复制成功！",
+    ["tr"] = "Sunucu kimliği başarıyla kopyalandı!",
+    ["ja"] = "サーバーIDが正常にコピーされました！",
+    ["ar"] = "تم نسخ معرف الخادم بنجاح!",
 }
 
-local function getTranslatedText()
-	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
-	return langText[langCode] or langText["en"]
+local function getTranslatedMessage()
+    local langCode = (LocalizationService.RobloxLocaleId or "en"):sub(1,2)
+    return langText[langCode] or langText["en"]
 end
 
-local function showNotif(screenGui, message)
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(0, 320, 0, 60)
-	frame.Position = UDim2.new(1, 300, 1, -20)
-	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	frame.BackgroundTransparency = 0.2
-	frame.BorderSizePixel = 0
-	frame.AnchorPoint = Vector2.new(1, 1)
-	frame.Visible = false
-	frame.ZIndex = 5
-	frame.Parent = screenGui
+-- Librairie Notification intégrée
+local NotificationLib = {
+    _notifications = {},
+    _theme = {
+        primaryColor = Color3.fromRGB(30,30,30),
+        textColor = Color3.fromRGB(255,255,255),
+        font = Enum.Font.GothamSemibold,
+        cornerRadius = UDim.new(0,8)
+    },
+    _settings = {
+        duration = 4,
+        spacing = 12,
+        fadeTime = 0.28,
+        slideDistance = 18
+    },
+    _icons = { info = "rbxassetid://9405926389" }
+}
 
-	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
-	local stroke = Instance.new("UIStroke", frame)
-	stroke.Color = Color3.fromRGB(0, 0, 0)
-	stroke.Thickness = 1
+function NotificationLib:_init()
+    if not self._container then
+        self._container = Instance.new("ScreenGui")
+        self._container.Name = "NotificationLibrary"
+        self._container.ResetOnSpawn = false
+        self._container.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        self._container.Parent = game:GetService("CoreGui")
+    end
+end
 
-	local label = Instance.new("TextLabel", frame)
-	label.Size = UDim2.new(1, -30, 1, 0)
-	label.Position = UDim2.new(0, 15, 0, 0)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.Font = Enum.Font.GothamMedium
-	label.TextSize = 16
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 6
-	label.Text = message
+function NotificationLib:_calculatePosition(index)
+    local spacing = self._settings.spacing
+    local height = 90
+    return UDim2.new(1,-24,1,-24-(index-1)*(height+spacing))
+end
 
-	frame.Visible = true
-	TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-		Position = UDim2.new(1, -20, 1, -20)
-	}):Play()
+function NotificationLib:_animateOut(frame, callback)
+    local tween = TweenService:Create(frame, TweenInfo.new(self._settings.fadeTime, Enum.EasingStyle.Quad), {
+        Position = frame.Position + UDim2.new(0,0,0,self._settings.slideDistance),
+        BackgroundTransparency = 1
+    })
+    tween:Play()
+    tween.Completed:Connect(function()
+        if frame and frame.Parent then frame:Destroy() end
+        if callback then callback() end
+    end)
+end
 
-	task.delay(3, function()
-		local tween = TweenService:Create(frame, TweenInfo.new(0.3), {
-			BackgroundTransparency = 1,
-			Position = UDim2.new(1, 300, 1, -20)
-		})
-		tween:Play()
-		tween.Completed:Wait()
-		frame:Destroy()
-	end)
+function NotificationLib:Notify(opt)
+    self:_init()
+    opt = opt or {}
+    local title = opt.Title or "Notification"
+    local message = opt.Message or ""
+    local duration = opt.Duration or self._settings.duration
+
+    local frame = Instance.new("Frame")
+    frame.BackgroundColor3 = self._theme.primaryColor
+    frame.Size = UDim2.new(0,340,0,90)
+    frame.AnchorPoint = Vector2.new(1,1)
+    frame.Position = self:_calculatePosition(#self._notifications+1)
+    frame.Parent = self._container
+    Instance.new("UICorner", frame).CornerRadius = self._theme.cornerRadius
+
+    local icon = Instance.new("ImageLabel", frame)
+    icon.Image = self._icons.info
+    icon.Size = UDim2.new(0,28,0,28)
+    icon.Position = UDim2.new(0,12,0,12)
+    icon.BackgroundTransparency = 1
+
+    local titleLabel = Instance.new("TextLabel", frame)
+    titleLabel.Font = self._theme.font
+    titleLabel.TextColor3 = self._theme.textColor
+    titleLabel.TextSize = 16
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Text = title
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Size = UDim2.new(1,-60,0,22)
+    titleLabel.Position = UDim2.new(0,48,0,10)
+
+    local msgLabel = Instance.new("TextLabel", frame)
+    msgLabel.Font = Enum.Font.Gotham
+    msgLabel.TextColor3 = self._theme.textColor
+    msgLabel.TextSize = 14
+    msgLabel.TextWrapped = true
+    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+    msgLabel.Text = message
+    msgLabel.BackgroundTransparency = 1
+    msgLabel.Size = UDim2.new(1,-60,0,48)
+    msgLabel.Position = UDim2.new(0,48,0,30)
+
+    table.insert(self._notifications, frame)
+
+    task.delay(duration, function()
+        if frame and frame.Parent then
+            self:_animateOut(frame,function()
+                for i,v in ipairs(self._notifications) do
+                    if v==frame then table.remove(self._notifications,i); break end
+                end
+            end)
+        end
+    end)
 end
 
 -- Bouton CopyGamelive avec notif
 local CopyGamelive = Instance.new("ImageButton", mainFrame)
-CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
-CopyGamelive.Size = UDim2.new(0, 41, 0, 41)
-CopyGamelive.Position = UDim2.new(0.5, -227, 0.5, -220)
+CopyGamelive.AnchorPoint = Vector2.new(0.5,0.5)
+CopyGamelive.Size = UDim2.new(0,41,0,41)
+CopyGamelive.Position = UDim2.new(0.5,-227,0.5,-220)
 CopyGamelive.Image = "http://www.roblox.com/asset/?id=122024633828045"
 CopyGamelive.BackgroundTransparency = 1
 CopyGamelive.ZIndex = 2
 
 CopyGamelive.MouseButton1Click:Connect(function()
 	local currentServerId = game.JobId
-	local joinCommand = 'Roblox.GameLauncher.joinGameInstance(' .. game.PlaceId .. ', "' .. currentServerId .. '")'
+	local joinCommand = 'Roblox.GameLauncher.joinGameInstance('..game.PlaceId..',"'..currentServerId..'")'
 	setclipboard(joinCommand)
 
-	local gui = mainFrame:FindFirstAncestorOfClass("ScreenGui")
-	if gui then
-		showNotif(gui, getTranslatedText())
-	end
+	NotificationLib:Notify({
+		Title = "Server ID",
+		Message = getTranslatedMessage(),
+		Duration = 4
+	})
 end)
 
 
@@ -910,6 +1060,7 @@ local Players = game:GetService("Players")
 local LocalizationService = game:GetService("LocalizationService")
 local LocalPlayer = Players.LocalPlayer
 
+-- // Traductions
 local langText = {
 	["fr"] = "Reconnexion au serveur...",
 	["en"] = "Reconnecting to server...",
@@ -925,76 +1076,158 @@ local langText = {
 }
 
 local function getTranslatedMessage()
-	local langCode = LocalizationService.RobloxLocaleId:sub(1, 2)
+	-- wait si nécessaire pour que RobloxLocaleId soit prêt
+	local tries = 0
+	while (not LocalizationService.RobloxLocaleId or #LocalizationService.RobloxLocaleId < 2) and tries < 20 do
+		tries = tries + 1
+		task.wait(0.05)
+	end
+	local langCode = (LocalizationService.RobloxLocaleId or "en"):sub(1, 2)
 	return langText[langCode] or langText["en"]
 end
 
-local function Translated(mainFrame)
-	if not mainFrame then return end
+-- // Début du timer
+local startTime = os.clock()
 
-	local screenGui = mainFrame:FindFirstAncestorOfClass("ScreenGui")
-	if not screenGui then return end
+-- // Librairie Notification intégrée (simple)
+local NotificationLib = {
+    _notifications = {},
+    _theme = {
+        primaryColor = Color3.fromRGB(30, 30, 30),
+        textColor = Color3.fromRGB(255, 255, 255),
+        font = Enum.Font.GothamSemibold,
+        cornerRadius = UDim.new(0, 8)
+    },
+    _settings = {
+        duration = 4,
+        position = "BottomRight",
+        maxNotifications = 5,
+        spacing = 12,
+        fadeTime = 0.28,
+        slideDistance = 18
+    },
+    _icons = {
+        info = "rbxassetid://9405926389"
+    }
+}
 
-	local notifFrame = Instance.new("Frame")
-	notifFrame.Size = UDim2.new(0, 320, 0, 60)
-	notifFrame.Position = UDim2.new(1, 300, 1, -20)
-	notifFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	notifFrame.BackgroundTransparency = 0.2
-	notifFrame.BorderSizePixel = 0
-	notifFrame.AnchorPoint = Vector2.new(1, 1)
-	notifFrame.Visible = false
-	notifFrame.ZIndex = 5
-	notifFrame.Parent = screenGui
+function NotificationLib:_init()
+	if not self._container then
+		self._container = Instance.new("ScreenGui")
+		self._container.Name = "NotificationLibrary"
+		self._container.ResetOnSpawn = false
+		self._container.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		self._container.Parent = game:GetService("CoreGui")
+	end
+end
 
-	Instance.new("UICorner", notifFrame).CornerRadius = UDim.new(0, 10)
-	local stroke = Instance.new("UIStroke", notifFrame)
-	stroke.Color = Color3.fromRGB(0, 0, 0)
-	stroke.Thickness = 1
+function NotificationLib:_calculatePosition(index)
+	local spacing = self._settings.spacing
+	local height = 90
+	return UDim2.new(1, -24, 1, -24 - (index - 1) * (height + spacing))
+end
 
-	local notifText = Instance.new("TextLabel", notifFrame)
-	notifText.Size = UDim2.new(1, -30, 1, 0)
-	notifText.Position = UDim2.new(0, 15, 0, 0)
-	notifText.BackgroundTransparency = 1
-	notifText.TextColor3 = Color3.fromRGB(255, 255, 255)
-	notifText.Font = Enum.Font.GothamMedium
-	notifText.TextSize = 16
-	notifText.TextXAlignment = Enum.TextXAlignment.Left
-	notifText.ZIndex = 6
-	notifText.Text = getTranslatedMessage()
+function NotificationLib:_animateOut(frame, callback)
+	local tween = TweenService:Create(frame, TweenInfo.new(self._settings.fadeTime, Enum.EasingStyle.Quad), {
+		Position = frame.Position + UDim2.new(0, 0, 0, self._settings.slideDistance),
+		BackgroundTransparency = 1
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		if frame and frame.Parent then frame:Destroy() end
+		if callback then callback() end
+	end)
+end
 
+function NotificationLib:Notify(opt)
+	self:_init()
+	opt = opt or {}
+	local title = opt.Title or "Notification"
+	local message = opt.Message or ""
+	local duration = opt.Duration or self._settings.duration
+
+	local frame = Instance.new("Frame")
+	frame.BackgroundColor3 = self._theme.primaryColor
+	frame.Size = UDim2.new(0, 340, 0, 90)
+	frame.AnchorPoint = Vector2.new(1, 1)
+	frame.Position = self:_calculatePosition(#self._notifications + 1)
+	frame.Parent = self._container
+	Instance.new("UICorner", frame).CornerRadius = self._theme.cornerRadius
+
+	local icon = Instance.new("ImageLabel", frame)
+	icon.Image = self._icons.info
+	icon.Size = UDim2.new(0, 28, 0, 28)
+	icon.Position = UDim2.new(0, 12, 0, 12)
+	icon.BackgroundTransparency = 1
+
+	local titleLabel = Instance.new("TextLabel", frame)
+	titleLabel.Font = self._theme.font
+	titleLabel.TextColor3 = self._theme.textColor
+	titleLabel.TextSize = 16
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.Text = title
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Size = UDim2.new(1, -60, 0, 22)
+	titleLabel.Position = UDim2.new(0, 48, 0, 10)
+
+	local msgLabel = Instance.new("TextLabel", frame)
+	msgLabel.Font = Enum.Font.Gotham
+	msgLabel.TextColor3 = self._theme.textColor
+	msgLabel.TextSize = 14
+	msgLabel.TextWrapped = true
+	msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+	msgLabel.Text = message
+	msgLabel.BackgroundTransparency = 1
+	msgLabel.Size = UDim2.new(1, -60, 0, 48)
+	msgLabel.Position = UDim2.new(0, 48, 0, 30)
+
+	table.insert(self._notifications, frame)
+
+	-- auto remove
+	task.delay(duration, function()
+		if frame and frame.Parent then
+			self:_animateOut(frame, function()
+				for i, v in ipairs(self._notifications) do
+					if v == frame then table.remove(self._notifications, i); break end
+				end
+			end)
+		end
+	end)
+end
+
+-- Fin du chargement et notif initiale (garantie d'affichage)
+-- Fin du chargement
+task.wait(0.1)
+local loadTime = os.clock() - startTime
+
+-- (supprimé ici : NotificationLib:Notify au démarrage)
+
+-- Bouton Rejoin (dans ton GUI principal)
+local function CreateRejoinButton(mainFrame)
+	local RejoinButton = Instance.new("ImageButton")
 	RejoinButton.Parent = mainFrame
 	RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
 	RejoinButton.Size = UDim2.new(0, 40, 0, 40)
 	RejoinButton.Position = UDim2.new(0.5, 204, 0.5, -220)
-	RejoinButton.Image = "http://www.roblox.com/asset/?id=103864549538113"
+	RejoinButton.Image = "rbxassetid://103864549538113"
 	RejoinButton.BackgroundTransparency = 1
 	RejoinButton.ZIndex = 10
 
 	RejoinButton.MouseButton1Click:Connect(function()
-		notifText.Text = getTranslatedMessage()
-		notifFrame.Visible = true
-
-		TweenService:Create(notifFrame, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-			Position = UDim2.new(1, -20, 1, -20)
-		}):Play()
-
-		task.delay(3, function()
-			local tween = TweenService:Create(notifFrame, TweenInfo.new(0.3), {
-				BackgroundTransparency = 1,
-				Position = UDim2.new(1, 300, 1, -20)
-			})
-			tween:Play()
-			tween.Completed:Wait()
-			notifFrame.Visible = false
-			notifFrame.BackgroundTransparency = 0.2
-			notifFrame.Position = UDim2.new(1, 300, 1, -20)
-		end)
-
+		local loadTime = os.clock() - startTime
+		NotificationLib:Notify({
+			Title = string.format("Time used: %.3f s", loadTime),
+			Message = getTranslatedMessage(),
+			Type = "info",
+			Duration = 5
+		})
+		task.wait(2)
 		TeleportService:Teleport(game.PlaceId, LocalPlayer)
 	end)
 end
 
-Translated(mainFrame)
+-- Appel final
+CreateRejoinButton(mainFrame)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1179,7 +1412,7 @@ Modules.print = function(color, text, size)
 	print(Text)
 end
 
-local version = "4.3"
+local version = "4.4"
 
 local translations = {
 	fr = {
@@ -1251,5 +1484,4 @@ Modules.print("Grey", msg.line, 20)
 Modules.print("Grey", msg.contact, 20)
 Modules.print("Grey", msg.line, 20)
 
---------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
