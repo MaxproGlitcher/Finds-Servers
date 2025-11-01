@@ -292,6 +292,247 @@ mainFrame.Draggable = true
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+-- Message Fête events et traduction
+
+local TweenService = game:GetService("TweenService")
+local LocalizationService = game:GetService("LocalizationService")
+
+-- 🎉 Détection des périodes spéciales (protégée par pcall)
+local isXmas, isNewYear, isEaster, isHalloween, isValentine = false, false, false, false, false
+
+pcall(function()
+	local date = os.date("*t")
+	isXmas = date.month == 12 and date.day >= 15 and date.day <= 29
+	isHalloween = (date.month == 10 and date.day >= 23) or (date.month == 11 and date.day <= 2)
+	isNewYear = (date.month == 12 and date.day >= 30) or (date.month == 1 and date.day <= 2)
+	isEaster = (date.month == 3 and date.day >= 31) or (date.month == 4 and date.day <= 15)
+	isValentine = (date.month == 2 and date.day == 14)
+end)
+
+-- 🌎 Traductions multilingues par fête
+local holidayTexts = {
+	Christmas = {
+		["fr"] = "🎄 Joyeux Noël !",
+		["en"] = "🎄 Merry Christmas!",
+		["es"] = "🎄 ¡Feliz Navidad!",
+		["pt"] = "🎄 Feliz Natal!",
+		["tr"] = "🎄 Mutlu Noeller!",
+		["it"] = "🎄 Buon Natale!",
+		["de"] = "🎄 Frohe Weihnachten!",
+		["ar"] = "🎄 عيد ميلاد سعيد!",
+		["ja"] = "🎄 メリークリスマス！",
+		["ru"] = "🎄 С Рождеством!",
+		["zh"] = "🎄 圣诞快乐！"
+	},
+	NewYear = {
+		["fr"] = "🎉 Bonne année !",
+		["en"] = "🎉 Happy New Year!",
+		["es"] = "🎉 ¡Feliz Año Nuevo!",
+		["pt"] = "🎉 Feliz Ano Novo!",
+		["tr"] = "🎉 Mutlu Yıllar!",
+		["it"] = "🎉 Buon Anno!",
+		["de"] = "🎉 Frohes Neues Jahr!",
+		["ar"] = "🎉 سنة جديدة سعيدة!",
+		["ja"] = "🎉 明けましておめでとう！",
+		["ru"] = "🎉 С Новым годом!",
+		["zh"] = "🎉 新年快乐！"
+	},
+	Easter = {
+		["fr"] = "🐰 Joyeuses Pâques !",
+		["en"] = "🐰 Happy Easter!",
+		["es"] = "🐰 ¡Feliz Pascua!",
+		["pt"] = "🐰 Feliz Páscoa!",
+		["tr"] = "🐰 Mutlu Paskalyalar!",
+		["it"] = "🐰 Buona Pasqua!",
+		["de"] = "🐰 Frohe Ostern!",
+		["ar"] = "🐰 عيد فصح سعيد!",
+		["ja"] = "🐰 ハッピーイースター！",
+		["ru"] = "🐰 С Пасхой!",
+		["zh"] = "🐰 复活节快乐！"
+	},
+	Halloween = {
+		["fr"] = "🎃 Joyeux Halloween !",
+		["en"] = "🎃 Happy Halloween!",
+		["es"] = "🎃 ¡Feliz Halloween!",
+		["pt"] = "🎃 Feliz Dia das Bruxas!",
+		["tr"] = "🎃 Mutlu Cadılar Bayramı!",
+		["it"] = "🎃 Buon Halloween!",
+		["de"] = "🎃 Frohes Halloween!",
+		["ar"] = "🎃 عيد هالوين سعيد!",
+		["ja"] = "🎃 ハッピーハロウィン！",
+		["ru"] = "🎃 С Хэллоуином!",
+		["zh"] = "🎃 万圣节快乐！"
+	},
+	Valentine = {
+		["fr"] = "💖 Bonne Saint-Valentin !",
+		["en"] = "💖 Happy Valentine's Day!",
+		["es"] = "💖 ¡Feliz Día de San Valentín!",
+		["pt"] = "💖 Feliz Dia dos Namorados!",
+		["tr"] = "💖 Sevgililer Gününüz Kutlu Olsun!",
+		["it"] = "💖 Buon San Valentino!",
+		["de"] = "💖 Alles Gute zum Valentinstag!",
+		["ar"] = "💖 عيد حب سعيد!",
+		["ja"] = "💖 ハッピーバレンタイン！",
+		["ru"] = "💖 С Днем Святого Валентина!",
+		["zh"] = "💖 情人节快乐！"
+	},
+	Welcome = {
+		["fr"] = "👋 Bienvenue sur Server Finder Deluxe !",
+		["en"] = "👋 Welcome to Server Finder Deluxe!",
+		["es"] = "👋 ¡Bienvenido a Server Finder Deluxe!",
+		["pt"] = "👋 Bem-vindo ao Server Finder Deluxe!",
+		["tr"] = "👋 Server Finder Deluxe'a Hoş Geldiniz!",
+		["it"] = "👋 Benvenuto su Server Finder Deluxe!",
+		["de"] = "👋 Willkommen bei Server Finder Deluxe!",
+		["ar"] = "👋 مرحبًا بك في Server Finder Deluxe!",
+		["ja"] = "👋 Server Finder Deluxeへようこそ！",
+		["ru"] = "👋 Добро пожаловать в Server Finder Deluxe!",
+		["zh"] = "👋 欢迎使用 Server Finder Deluxe！"
+	}
+}
+
+-- 🌐 Fonction pour obtenir le message traduit
+local function getHolidayMessage(eventKey)
+	local langCode = (LocalizationService.RobloxLocaleId or "en"):sub(1,2)
+	local eventTable = holidayTexts[eventKey]
+	return eventTable and (eventTable[langCode] or eventTable["en"]) or "Happy holidays! 🎉"
+end
+
+-- 🧭 Librairie Notification
+local NotificationLib = {
+	_notifications = {},
+	_theme = {
+		primaryColor = Color3.fromRGB(30, 30, 30),
+		textColor = Color3.fromRGB(255, 255, 255),
+		font = Enum.Font.GothamSemibold,
+		cornerRadius = UDim.new(0, 8)
+	},
+	_settings = {
+		duration = 4,
+		spacing = 12,
+		fadeTime = 0.28,
+		slideDistance = 18
+	},
+	_icons = { info = "rbxassetid://9405926389" }
+}
+
+function NotificationLib:_init()
+	if not self._container then
+		self._container = Instance.new("ScreenGui")
+		self._container.Name = "NotificationLibrary"
+		self._container.ResetOnSpawn = false
+		self._container.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		self._container.Parent = game:GetService("CoreGui")
+	end
+end
+
+function NotificationLib:_calculatePosition(index)
+	local spacing = self._settings.spacing
+	local height = 90
+	return UDim2.new(1, -24, 1, -24 - (index-1)*(height+spacing))
+end
+
+function NotificationLib:_animateOut(frame, callback)
+	local tween = TweenService:Create(frame, TweenInfo.new(self._settings.fadeTime, Enum.EasingStyle.Quad), {
+		Position = frame.Position + UDim2.new(0,0,0,self._settings.slideDistance),
+		BackgroundTransparency = 1
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		if frame and frame.Parent then frame:Destroy() end
+		if callback then callback() end
+	end)
+end
+
+function NotificationLib:Notify(opt)
+	self:_init()
+	opt = opt or {}
+	local title = opt.Title or "Notification"
+	local message = opt.Message or ""
+	local duration = opt.Duration or self._settings.duration
+
+	local frame = Instance.new("Frame")
+	frame.BackgroundColor3 = self._theme.primaryColor
+	frame.Size = UDim2.new(0, 340, 0, 90)
+	frame.AnchorPoint = Vector2.new(1,1)
+	frame.Position = self:_calculatePosition(#self._notifications + 1)
+	frame.Parent = self._container
+	Instance.new("UICorner", frame).CornerRadius = self._theme.cornerRadius
+
+	local icon = Instance.new("ImageLabel", frame)
+	icon.Image = self._icons.info
+	icon.Size = UDim2.new(0,28,0,28)
+	icon.Position = UDim2.new(0,12,0,12)
+	icon.BackgroundTransparency = 1
+
+	local titleLabel = Instance.new("TextLabel", frame)
+	titleLabel.Font = self._theme.font
+	titleLabel.TextColor3 = self._theme.textColor
+	titleLabel.TextSize = 16
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.Text = title
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Size = UDim2.new(1,-60,0,22)
+	titleLabel.Position = UDim2.new(0,48,0,10)
+
+	local msgLabel = Instance.new("TextLabel", frame)
+	msgLabel.Font = Enum.Font.Gotham
+	msgLabel.TextColor3 = self._theme.textColor
+	msgLabel.TextSize = 14
+	msgLabel.TextWrapped = true
+	msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+	msgLabel.Text = message
+	msgLabel.BackgroundTransparency = 1
+	msgLabel.Size = UDim2.new(1,-60,0,48)
+	msgLabel.Position = UDim2.new(0,48,0,30)
+
+	table.insert(self._notifications, frame)
+
+	task.delay(duration, function()
+		if frame and frame.Parent then
+			self:_animateOut(frame, function()
+				for i,v in ipairs(self._notifications) do
+					if v == frame then table.remove(self._notifications,i); break end
+				end
+			end)
+		end
+	end)
+end
+
+-- 💌 Notification automatique selon la fête détectée
+local eventName
+local message
+
+if isXmas then
+	eventName = "🎄 Christmas"
+	message = getHolidayMessage("Christmas")
+elseif isNewYear then
+	eventName = "🎉 New Year"
+	message = getHolidayMessage("NewYear")
+elseif isEaster then
+	eventName = "🐰 Easter"
+	message = getHolidayMessage("Easter")
+elseif isHalloween then
+	eventName = "🎃 Halloween"
+	message = getHolidayMessage("Halloween")
+elseif isValentine then
+	eventName = "💖 Valentine's Day"
+	message = getHolidayMessage("Valentine")
+else
+	eventName = "👋 Welcome"
+	message = getHolidayMessage("Welcome")
+end
+
+task.wait(2)
+NotificationLib:Notify({
+	Title = eventName,
+	Message = message,
+	Duration = 6
+})
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 -- protection lors du screen shot le Gui deviendras invisible lors du screen shot
 
 local CaptureService = game:GetService("CaptureService")
@@ -322,7 +563,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v4.4"
+versionLabel.Text = "v4.5"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -1412,7 +1653,7 @@ Modules.print = function(color, text, size)
 	print(Text)
 end
 
-local version = "4.4"
+local version = "4.5"
 
 local translations = {
 	fr = {
@@ -1484,4 +1725,4 @@ Modules.print("Grey", msg.line, 20)
 Modules.print("Grey", msg.contact, 20)
 Modules.print("Grey", msg.line, 20)
 
-------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
