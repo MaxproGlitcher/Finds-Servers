@@ -303,7 +303,7 @@ local isXmas, isNewYear, isEaster, isHalloween, isValentine = false, false, fals
 pcall(function()
 	local date = os.date("*t")
 	isXmas = date.month == 12 and date.day >= 15 and date.day <= 29
-	isHalloween = (date.month == 10 and date.day >= 23) or (date.month == 11 and date.day <= 2)
+	isHalloween = (date.month == 10 and date.day >= 23) or (date.month == 11 and date.day <= 1)
 	isNewYear = (date.month == 12 and date.day >= 30) or (date.month == 1 and date.day <= 2)
 	isEaster = (date.month == 3 and date.day >= 31) or (date.month == 4 and date.day <= 15)
 	isValentine = (date.month == 2 and date.day == 14)
@@ -582,7 +582,7 @@ local isValentineDay = false
 pcall(function()
 	local date = os.date("*t")
 	isXmas = date.month == 12 and date.day >= 15 and date.day <= 29
-	isHalloween = (date.month == 10 and date.day >= 23) or (date.month == 11 and date.day <= 2)
+	isHalloween = (date.month == 10 and date.day >= 23) or (date.month == 11 and date.day <= 1)
 	isNewYear = (date.month == 12 and date.day >= 30) or (date.month == 1 and date.day <= 2)
 	isEaster = (date.month == 3 and date.day >= 31) or (date.month == 4 and date.day <= 15)
 	isValentineDay = (date.month == 2 and date.day == 14)
