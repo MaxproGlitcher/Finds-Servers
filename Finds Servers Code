@@ -17,7 +17,7 @@
   / ____|                          |  ____(_)         | |           |  __ \     | |               
  | (___   ___ _ ____   _____ _ __  | |__   _ _ __   __| | ___ _ __  | |  | | ___| |_   ___  _____ 
   \___ \ / _ \ '__\ \ / / _ \ '__| |  __| | | '_ \ / _` |/ _ \ '__| | |  | |/ _ \ | | | \ \/ / _ \
-  ____) |  __/ |   \ V /  __/ |    | |    | | | | | (_| |  __/ |    | |__| |  __/ | |_| |>  <  __/
+  ____) |  __/ |   \ V /  __/ |    | |    | | | | | (_| |  __/ |    | |__| |  __/ | |_| |>  <  __/#
  |_____/ \___|_|    \_/ \___|_|    |_|    |_|_| |_|\__,_|\___|_|    |_____/ \___|_|\__,_/_/\_\___|
                                                                                                   
                                                                                                   
@@ -102,8 +102,18 @@ local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
+local LocalizationService = game:GetService("LocalizationService")
+local TweenService = game:GetService("TweenService")
+local VRService = game:GetService("VRService")
+
+local camera = workspace:FindFirstChildOfClass("Camera") or workspace.CurrentCamera
+if not camera then
+	repeat task.wait() camera = workspace.CurrentCamera until camera
+end
+local SCREEN_SIZE = camera.ViewportSize
 
 local IsOnMobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, game:GetService("UserInputService"):GetPlatform())
+local IsOnMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 VREnabled = game:GetService("VRService").VREnabled
 
 queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
@@ -151,7 +161,6 @@ local function getTranslatedMessage()
 end
 
 
---  Librairie Notification intégrée
 local NotificationLib = {
     _notifications = {},
     _theme = {
@@ -288,8 +297,15 @@ mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
-mainFrame.Draggable = true
+mainFrame.Draggable = false -- Désativer le temps je trouve une solution !
 
+-- Détection des Screen 
+
+if isMobile or SCREEN_SIZE.X < 800 then
+	mainFrame.Size = UDim2.new(0, 800, 0, 600)
+else
+	mainFrame.Size = UDim2.new(0, 650, 0, 500)
+end
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Message Fête events et traduction
@@ -563,7 +579,7 @@ local versionLabel = Instance.new("TextLabel", mainFrame)
 versionLabel.Size = UDim2.new(0, 150, 0, 25)
 versionLabel.Position = UDim2.new(0, 10, 0, 10)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v4.5"
+versionLabel.Text = "v4.6"
 versionLabel.Font = Enum.Font.Ubuntu
 versionLabel.TextSize = 16
 versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -699,6 +715,8 @@ end
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+
 local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
 scrollFrame.Size = UDim2.new(1, -20, 1, -60)
 scrollFrame.Position = UDim2.new(0, 10, 0, 50)
@@ -706,10 +724,32 @@ scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scrollFrame.ScrollBarThickness = 6
 scrollFrame.BackgroundTransparency = 1
+scrollFrame.ClipsDescendants = true
+
+local layout = Instance.new("UIListLayout", scrollFrame)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 10)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local isScrolling = false
+
+scrollFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseWheel or input.UserInputType == Enum.UserInputType.Touch then
+		isScrolling = true
+		mainFrame.Active = false
+	end
+end)
+
+scrollFrame.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseWheel or input.UserInputType == Enum.UserInputType.Touch then
+		task.delay(0.1, function()
+			isScrolling = false
+			mainFrame.Active = true
+		end)
+	end
+end)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-local layout = Instance.new("UIListLayout", scrollFrame)
-layout.Padding = UDim.new(0, 10)
 
 local posChange = 8
 local serverFrames = {}
@@ -945,7 +985,7 @@ local function getTranslatedMessage()
 	return langText[langCode] or langText["en"]
 end
 
--- Librairie Notification intégrée
+
 local NotificationLib = {
     _notifications = {},
     _theme = {
@@ -1048,29 +1088,31 @@ end
 
 -- Bouton Refresh 
 local function CreateRefreshButton(mainFrame)
-	local refreshBtn = Instance.new("ImageButton")
-	refreshBtn.Parent = mainFrame
-	refreshBtn.AnchorPoint = Vector2.new(0.5,0.5)
-	refreshBtn.Size = UDim2.new(0,47,0,47)
-	refreshBtn.Position = UDim2.new(0.5,250,0.5,-220)
-	refreshBtn.Image = "http://www.roblox.com/asset/?id=126446661859683"
-	refreshBtn.BackgroundTransparency = 1
-	refreshBtn.ZIndex = 10
+    local refreshBtn = Instance.new("ImageButton")
+    refreshBtn.Parent = mainFrame
+    refreshBtn.AnchorPoint = Vector2.new(0.5,0.5)
+    refreshBtn.Size = UDim2.new(0,47,0,47)
+    refreshBtn.Position = UDim2.new(0.5,250,0.5,-220)
+    refreshBtn.Image = "http://www.roblox.com/asset/?id=126446661859683"
+    refreshBtn.BackgroundTransparency = 1
+    refreshBtn.ZIndex = 10
 
-	refreshBtn.MouseButton1Click:Connect(function()
-		local success, err = pcall(refreshServers)
-		if not success then
-			NotificationLib:Notify({
-				Title = "Error",
-				Message = getTranslatedMessage(),
-				Duration = 4
-			})
-		end
-	end)
+    refreshBtn.MouseButton1Click:Connect(function()
+        local success, err = pcall(refreshServers)
+        if not success then
+            NotificationLib:Notify({
+                Title = "Error",
+                Message = getTranslatedMessage(),
+                Duration = 4
+            })
+        end
+    end)
+
+    return refreshBtn
 end
 
--- Appel refresh Button
-CreateRefreshButton(mainFrame)
+
+local refreshBtn = CreateRefreshButton(mainFrame)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1152,7 +1194,7 @@ local function getTranslatedMessage()
     return langText[langCode] or langText["en"]
 end
 
--- Librairie Notification intégrée
+
 local NotificationLib = {
     _notifications = {},
     _theme = {
@@ -1301,7 +1343,7 @@ local Players = game:GetService("Players")
 local LocalizationService = game:GetService("LocalizationService")
 local LocalPlayer = Players.LocalPlayer
 
--- // Traductions
+
 local langText = {
 	["fr"] = "Reconnexion au serveur...",
 	["en"] = "Reconnecting to server...",
@@ -1317,7 +1359,7 @@ local langText = {
 }
 
 local function getTranslatedMessage()
-	-- wait si nécessaire pour que RobloxLocaleId soit prêt
+	
 	local tries = 0
 	while (not LocalizationService.RobloxLocaleId or #LocalizationService.RobloxLocaleId < 2) and tries < 20 do
 		tries = tries + 1
@@ -1327,10 +1369,10 @@ local function getTranslatedMessage()
 	return langText[langCode] or langText["en"]
 end
 
--- // Début du timer
+
 local startTime = os.clock()
 
--- // Librairie Notification intégrée (simple)
+
 local NotificationLib = {
     _notifications = {},
     _theme = {
@@ -1424,7 +1466,6 @@ function NotificationLib:Notify(opt)
 
 	table.insert(self._notifications, frame)
 
-	-- auto remove
 	task.delay(duration, function()
 		if frame and frame.Parent then
 			self:_animateOut(frame, function()
@@ -1436,39 +1477,37 @@ function NotificationLib:Notify(opt)
 	end)
 end
 
--- Fin du chargement et notif initiale (garantie d'affichage)
--- Fin du chargement
+
 task.wait(0.1)
 local loadTime = os.clock() - startTime
 
--- (supprimé ici : NotificationLib:Notify au démarrage)
-
--- Bouton Rejoin (dans ton GUI principal)
 local function CreateRejoinButton(mainFrame)
-	local RejoinButton = Instance.new("ImageButton")
-	RejoinButton.Parent = mainFrame
-	RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
-	RejoinButton.Size = UDim2.new(0, 40, 0, 40)
-	RejoinButton.Position = UDim2.new(0.5, 204, 0.5, -220)
-	RejoinButton.Image = "rbxassetid://103864549538113"
-	RejoinButton.BackgroundTransparency = 1
-	RejoinButton.ZIndex = 10
+    local RejoinButton = Instance.new("ImageButton")
+    RejoinButton.Parent = mainFrame
+    RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
+    RejoinButton.Size = UDim2.new(0, 40, 0, 40)
+    RejoinButton.Position = UDim2.new(0.5, 204, 0.5, -220)
+    RejoinButton.Image = "rbxassetid://103864549538113"
+    RejoinButton.BackgroundTransparency = 1
+    RejoinButton.ZIndex = 10
 
-	RejoinButton.MouseButton1Click:Connect(function()
-		local loadTime = os.clock() - startTime
-		NotificationLib:Notify({
-			Title = string.format("Time used: %.3f s", loadTime),
-			Message = getTranslatedMessage(),
-			Type = "info",
-			Duration = 5
-		})
-		task.wait(2)
-		TeleportService:Teleport(game.PlaceId, LocalPlayer)
-	end)
+    RejoinButton.MouseButton1Click:Connect(function()
+        local loadTime = os.clock() - startTime
+        NotificationLib:Notify({
+            Title = string.format("Time used: %.3f s", loadTime),
+            Message = getTranslatedMessage(),
+            Type = "info",
+            Duration = 5
+        })
+        task.wait(2)
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end)
+
+    return RejoinButton
 end
 
--- Appel final
-CreateRejoinButton(mainFrame)
+
+local RejoinButton = CreateRejoinButton(mainFrame)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1491,68 +1530,96 @@ local function toggleGuiSize()
 		scrollFrame.Size = UDim2.new(1, -20, 1, -60)
 		scrollFrame.Position = UDim2.new(0, 10, 0, 50)
 
-		refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		refreshBtn.Size = UDim2.new(0, 47, 0, 47)
-		refreshBtn.Position = UDim2.new(0.5, 250, 0.5, -220)
+	 if refreshBtn then
+        refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        refreshBtn.Size = UDim2.new(0, 47, 0, 47)
+        refreshBtn.Position = UDim2.new(0.5, 250, 0.5, -220)
+    end
 
-		closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		closeBtn.Size = UDim2.new(0, 40, 0, 40)
-		closeBtn.Position = UDim2.new(0.5, 298, 0.5, -220)
+	 if closeBtn then
+        closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        closeBtn.Size = UDim2.new(0, 40, 0, 40)
+         closeBtn.Position = UDim2.new(0.5, 298, 0.5, -220)
+    end
 
-		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
-		resizeButton.Size = UDim2.new(0, 40, 0, 40)
-		resizeButton.Position = UDim2.new(0.5, 157, 0.5, -220)
+	if resizeButton then
+        resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        resizeButton.Size = UDim2.new(0, 40, 0, 40)
+        resizeButton.Position = UDim2.new(0.5, 157, 0.5, -220)
+    end
 
-		RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
-		RejoinButton.Size = UDim2.new(0, 40, 0, 40)
-		RejoinButton.Position = UDim2.new(0.5, 204, 0.5, -220)
+	if RejoinButton then
+        RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        RejoinButton.Size = UDim2.new(0, 40, 0, 40)
+        RejoinButton.Position = UDim2.new(0.5, 204, 0.5, -220)
+    end
 
-		lowPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		lowPlayersBtn.Size = UDim2.new(0, 40, 0, 40)
-		lowPlayersBtn.Position = UDim2.new(0.5, -183, 0.5, -220)
+	if lowPlayersBtn then
+        lowPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        lowPlayersBtn.Size = UDim2.new(0, 40, 0, 40)
+        lowPlayersBtn.Position = UDim2.new(0.5, -183, 0.5, -220)
+    end
 
-		maxPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		maxPlayersBtn.Size = UDim2.new(0, 40, 0, 40)
-		maxPlayersBtn.Position = UDim2.new(0.5, -264, 0.5, -220)
+	if maxPlayersBtn then
+        maxPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        maxPlayersBtn.Size = UDim2.new(0, 40, 0, 40)
+        maxPlayersBtn.Position = UDim2.new(0.5, -264, 0.5, -220)
+    end
 
-		CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
-                CopyGamelive.Size = UDim2.new(0, 41, 0, 41)
-                CopyGamelive.Position = UDim2.new(0.5, -227, 0.5, -220)
+	if CopyGamelive then
+        CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
+        CopyGamelive.Size = UDim2.new(0, 41, 0, 41)
+        CopyGamelive.Position = UDim2.new(0.5, -227, 0.5, -220)
+    end
 
 	else  
 		mainFrame.Size = UDim2.new(0, 549, 0, 390)
 		scrollFrame.Size = UDim2.new(1, -10, 1, -40)
 		scrollFrame.Position = UDim2.new(0, 5, 0, 40)
 
-		refreshBtn.Position = UDim2.new(0.5, 225, 0.5, -175)
-		refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		refreshBtn.Size = UDim2.new(0, 30, 0, 30)
-		
-		closeBtn.Position = UDim2.new(0.5, 255, 0.5, -175)
-		closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		closeBtn.Size = UDim2.new(0, 25, 0, 25)
+	if refreshBtn then
+        refreshBtn.Position = UDim2.new(0.5, 225, 0.5, -175)
+        refreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        refreshBtn.Size = UDim2.new(0, 30, 0, 30)
+    end
 
-		RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
-		RejoinButton.Size = UDim2.new(0, 25, 0, 25)
-		RejoinButton.Position = UDim2.new(0.5, 195, 0.5, -175)
+	if closeBtn then
+        closeBtn.Position = UDim2.new(0.5, 255, 0.5, -175)
+        closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        closeBtn.Size = UDim2.new(0, 25, 0, 25)
+    end
 
-		maxPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		maxPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
-		maxPlayersBtn.Position = UDim2.new(0.5, -222, 0.5, -175)
+	if RejoinButton then
+        RejoinButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        RejoinButton.Size = UDim2.new(0, 25, 0, 25)
+        RejoinButton.Position = UDim2.new(0.5, 195, 0.5, -175)
+    end
 
-		lowPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-		lowPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
-		lowPlayersBtn.Position = UDim2.new(0.5, -173, 0.5, -175)
+	if maxPlayersBtn then
+        maxPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+         maxPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
+         maxPlayersBtn.Position = UDim2.new(0.5, -222, 0.5, -175)
+    end
 
-                CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
-                CopyGamelive.Size = UDim2.new(0, 25, 0, 25)
-                CopyGamelive.Position = UDim2.new(0.5, -199, 0.5, -175)
 
-		resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
-		resizeButton.Size = UDim2.new(0, 25, 0, 25)
-		resizeButton.Position = UDim2.new(0.5, 167, 0.5, -175)
+	if lowPlayersBtn then
+        lowPlayersBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+        lowPlayersBtn.Size = UDim2.new(0, 25, 0, 25)
+        lowPlayersBtn.Position = UDim2.new(0.5, -173, 0.5, -175)
+    end
 
-	end
+    if CopyGamelive then
+        CopyGamelive.AnchorPoint = Vector2.new(0.5, 0.5)
+        CopyGamelive.Size = UDim2.new(0, 25, 0, 25)
+         CopyGamelive.Position = UDim2.new(0.5, -199, 0.5, -175)
+    end
+
+	   if resizeButton then
+           resizeButton.AnchorPoint = Vector2.new(0.5, 0.5)
+           resizeButton.Size = UDim2.new(0, 25, 0, 25)
+           resizeButton.Position = UDim2.new(0.5, 167, 0.5, -175)
+        end
+    end
 	isSmall = not isSmall
 end
 
@@ -1653,7 +1720,7 @@ Modules.print = function(color, text, size)
 	print(Text)
 end
 
-local version = "4.5"
+local version = "4.6"
 
 local translations = {
 	fr = {
